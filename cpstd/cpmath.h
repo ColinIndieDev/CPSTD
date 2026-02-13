@@ -97,7 +97,7 @@ f32 tanhf(f32 x);
 void mat2f_print(mat2f *m) {
     for (int r = 0; r < m->rows; r++) {
         for (int c = 0; c < m->cols; c++) {
-            printf("%f", mat2f_at(m, r, c));
+            printf("%f", *mat2f_at(m, r, c));
 
             if (c < m->cols - 1) {
                 printf(", ");

@@ -1,42 +1,20 @@
-
-#include "../cpstd/cpbase.h"
-#include "../cpstd/cppair.h"
-#include "../cpstd/cpstr.h"
-#include "../cpstd/cpvec.h"
-#include "../cpstd/cpmath.h"
-
-VEC_DEF(i32, vec_i32)
-VEC_DEF(vec_i32 *, vec_vec_i32);
+#include "../cpaudio/cpa.h"
 
 int main() {
-    vec_vec_i32 vec;
-    vec_vec_i32_reserve(&vec, 5);
+    vec_note notes;
 
-    for (int i = 0; i < 5; i++) {
-        vec_i32 *v = malloc(sizeof(vec_i32));
-        vec_i32_init(v, 5, i);
+    vec_note_reserve(&notes, 16);
 
-        vec_vec_i32_push_back(&vec, v);
-    }
+    // Note : Freq (Hz), Duration (s)
+    vec_note_push_back(&notes, (note){392, 60.0f / 76.0f});
+    vec_note_push_back(&notes, (note){440, 60.0f / 76.0f});
+    vec_note_push_back(&notes, (note){294, 60.0f / 144.0f});
+    vec_note_push_back(&notes, (note){440, 60.0f / 76.0f});
+    vec_note_push_back(&notes, (note){494, 60.0f / 76.0f});
 
-    vec_i32_pop_back(vec.data[0]);
-    vec.data[1]->data[0] = 67;
+    FILE *f = cpa_create_wav("music.wav");
 
-    for (int i = 0; i < vec.size; i++) {
-        for (int j = 0; j < vec.data[i]->size; j++) {
-            int val = vec.data[i]->data[j];
-            printf("%d", val);
+    cpa_fill_wav(f, &notes);
 
-            if (j < vec.data[i]->size - 1) {
-                printf(", ");
-            }
-        }
-        printf("\n");
-    }
-
-    mat2f matrix;
-
-    mat2f_init(&matrix, 3, 7, 25);
-
-    mat2f_print(&matrix);
+    fclose(f);
 }
