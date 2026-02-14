@@ -13,7 +13,7 @@ typedef struct {                                                            \
 } name;                                                                     \
 void name##_init(name *vec, size_t size, type val) {                        \
     vec->capacity = size > 10 ? size * 2 : 10;                              \
-    vec->data = malloc(vec->capacity * sizeof(type));                        \
+    vec->data = malloc(vec->capacity * sizeof(type));                       \
     vec->size = size;                                                       \
     for (size_t i = 0; i < vec->size; i++) {                                \
         vec->data[i] = val;                                                 \
@@ -29,7 +29,7 @@ type *name##_at(name *vec, size_t i) {                                      \
            vec->size > 0);                                                  \
     return &vec->data[i];                                                   \
 }                                                                           \
-type name##_get(name *vec, size_t i) {                                        \
+type name##_get(name *vec, size_t i) {                                      \
     assert("Out of bounds or not initialized" && 0 <= i && i < vec->size && \
            vec->size > 0);                                                  \
     return vec->data[i];                                                    \

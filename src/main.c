@@ -1,6 +1,12 @@
 #include "../cpaudio/cpa.h"
 
+void DoCPA();
+
 int main() {
+   DoCPA(); 
+}
+
+void DoCPA() {
     vec_note notes;
 
     vec_note_reserve(&notes, 16);

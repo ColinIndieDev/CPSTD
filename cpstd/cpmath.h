@@ -2,97 +2,215 @@
 
 #include "cpbase.h"
 #include "cpvec.h"
+#include <string.h>
 
 #define PI 3.14159265358979323846f
+
+#define CP_MIN(x, y) ((x) < (y) ? (x) : (y))
+#define CP_MAX(x, y) ((x) > (y) ? (x) : (y))
+#define CP_ABS(x) ((x) > 0 ? (x) : -(x))
+#define CP_CLAMP(x, n, m) ((x) > (n) ? ((x) < (m) ? (x) : (m)) : (n))
 
 VEC_DEF(f32, vecf)
 
 typedef struct {
     vecf data;
-    size_t rows, cols;
+    u32 rows, cols;
 } mat2f;
 
-void mat2f_init(mat2f *m, size_t rows, size_t cols, f32 val) {
+void mat2f_init(mat2f *m, u32 rows, u32 cols, f32 val) {
     vecf_init(&m->data, rows * cols, val);
     m->rows = rows;
     m->cols = cols;
 }
 
-f32 *mat2f_at(mat2f *m, size_t row, size_t col) {
+f32 *mat2f_at(mat2f *m, u32 row, u32 col) {
     assert(row < m->rows && col < m->cols);
 
     return &m->data.data[(row * m->cols) + col];
 }
-/*
-[[nodiscard]] f32 get(const size_t row, const size_t col) const {
-    if (row >= rows || col >= cols)
-        return 0.0f;
 
-    return data[(row * cols) + col];
+f32 mat2f_get(mat2f *m, u32 row, u32 col) {
+    assert(row < m->rows && col < m->cols);
+
+    return m->data.data[(row * m->cols) + col];
 }
 
-f32 *rowPtr(const size_t r) { return data.data() + (r * cols); }
-[[nodiscard]] std::vector<f32> getRow(const size_t r) const {
-    std::vector<f32> row(cols);
-    std::copy(data.begin() + scast(i32, r * cols),
-              data.begin() + scast(i32, (r + 1) * cols), row.begin());
-    return row;
-}
-[[nodiscard]] const f32 *rowPtr(const size_t r) const {
-    return data.data() + (r * cols);
+f32 *mat2f_row_ptr(mat2f *m, u32 row) { return &m->data.data[row * m->cols]; }
+void mat2f_get_row(mat2f *m, u32 row, f32 *out) {
+    assert(r < m->rows);
+
+    memcpy(out, &m->data.data[row * m->cols], m->cols * sizeof(f32));
 }
 
-[[nodiscard]] size_t size() const { return rows * cols; }
-*/
+u32 mat2f_size(mat2f *m) { return m->data.size; }
 
-/*
-struct Vec3f {
+void mat2f_add(mat2f *m1, mat2f *m2, mat2f *out) {
+    assert(m1->rows == m2->rows && m1->cols == m2->cols &&
+           out->rows == m1->rows && out->cols == m1->cols);
+
+    for (u32 i = 0; i < m1->data.size; i++) {
+        out->data.data[i] = m1->data.data[i] + m2->data.data[i];
+    }
+}
+void mat2f_sub(mat2f *m1, mat2f *m2, mat2f *out) {
+    assert(m1->rows == m2->rows && m1->cols == m2->cols &&
+           out->rows == m1->rows && out->cols == m1->cols);
+
+    for (u32 i = 0; i < m1->data.size; i++) {
+        out->data.data[i] = m1->data.data[i] - m2->data.data[i];
+    }
+}
+void mat2f_mul(mat2f *m1, mat2f *m2, mat2f *out) {
+    assert(m1->rows == m2->rows && m1->cols == m2->cols &&
+           out->rows == m1->rows && out->cols == m1->cols);
+
+    for (u32 i = 0; i < m1->data.size; i++) {
+        out->data.data[i] = m1->data.data[i] * m2->data.data[i];
+    }
+}
+void mat2f_div(mat2f *m1, mat2f *m2, mat2f *out) {
+    assert(m1->rows == m2->rows && m1->cols == m2->cols &&
+           out->rows == m1->rows && out->cols == m1->cols);
+
+    for (u32 i = 0; i < m1->data.size; i++) {
+        out->data.data[i] = m1->data.data[i] / m2->data.data[i];
+    }
+}
+
+typedef struct {
     f32 x, y, z;
+} vec3f;
+typedef struct {
+    f32 x, y;
+} vec2f;
 
-    Vec3f(const f32 x, const f32 y, const f32 z) : x(x), y(y), z(z) {}
-    Vec3f(const f32 val) : x(val), y(val), z(val) {}
-};
+f32 cp_factorial(i32 n) {
+    if (n == 0 || n == 1) {
+        return 1.0f;
+    }
+    f32 result = 1.0f;
+    for (int i = 2; i <= n; i++) {
+        result *= (f32)i;
+    }
+    return result;
+}
 
-struct Vec3i {
-    i32 x, y, z;
+f32 cp_expf(f32 x) {
+    f32 result = 1.0f;
+    f32 term = 1.0f;
 
-    Vec3i(const i32 x, const i32 y, const i32 z) : x(x), y(y), z(z) {}
-    Vec3i(const i32 val) : x(val), y(val), z(val) {}
-};
+    i32 termsCount = 20;
+    for (int n = 1; n <= termsCount; n++) {
+        term *= x / (f32)n;
+        result += term;
+    }
+    return result;
+}
 
-Mat2f AddMat2f(const Mat2f &a, const Mat2f &b);
-Mat2f SubMat2f(const Mat2f &a, const Mat2f &b);
+f32 cp_powf(f32 x, i32 n) {
+    f32 result = 1.0f;
+    for (int i = 0; i < n; i++) {
+        result *= x;
+    }
+    return n > 0 ? result : 1 / result;
+}
 
-void PrintMat2f(Mat2f &m);
-void PrintMat2f(Mat2f m);
-*/
+f32 cp_sinf(f32 x) {
+    f32 result = 0.0f;
 
-/*
+    while (x > PI) {
+        x -= 2 * PI;
+    }
+    while (x < -PI) {
+        x += 2 * PI;
+    }
 
-i32 max(i32 a, i32 b);
-f32 maxf(f32 a, f32 b);
-i32 min(i32 a, i32 b);
-f32 minf(f32 a, f32 b);
+    i32 n = 10;
+    for (int i = 0; i < n; i++) {
+        f32 sign = cp_powf(-1, i);
+        f32 num = cp_powf(x, (2 * i) + 1);
+        f32 den = cp_factorial((2 * i) + 1);
+        result += sign * (num / den);
+    }
+    return result;
+}
 
-i32 abs(i32 x);
-f32 absf(f32 x);
+f32 cp_cosf(f32 x) {
+    f32 result = 1.0f;
+    f32 term = 1.0f;
 
-i32 clamp(i32 x, i32 n, i32 m);
-f32 clampf(f32 x, f32 n, f32 m);
+    while (x > PI) {
+        x -= 2 * PI;
+    }
+    while (x < -PI) {
+        x += 2 * PI;
+    }
 
-f32 factorial(i32 n);
-f32 expf(f32 x, i32 termsCount = 20);
+    i32 n = 10;
+    for (int i = 1; i <= n; i++) {
+        f32 sign = -cp_powf(x, 2);
+        f32 num = 2.0f * (f32)i;
+        term *= sign / (num * (num - 1));
+        result += term;
+    }
+    return result;
+}
 
-f32 powf(f32 x, i32 n);
+f32 cp_tanf(f32 x) { return cp_sinf(x) / cp_cosf(x); }
 
-f32 sinf(f32 x, i32 n = 10);
-f32 cosf(f32 x, i32 n = 10);
-f32 tanf(f32 x);
-f32 sinhf(f32 x);
-f32 coshf(f32 x);
-f32 tanhf(f32 x);
+f32 cp_sinhf(f32 x) { return (cp_expf(x) - cp_expf(-x)) / 2; }
 
-*/
+f32 cp_coshf(f32 x) { return (cp_expf(x) + cp_expf(-x)) / 2; }
+
+f32 cp_tanhf(f32 x) { return cp_sinhf(x) / cp_coshf(x); }
+
+f32 cp_sqrt(f32 n) {
+    if (n < 0) {
+        return -1.0f;
+    }
+    if (n == 0) {
+        return 0.0f;
+    }
+    f32 tolerance = 1e-5f;
+    f32 guess = n / 2.0f;
+    while (true) {
+        f32 newGuess = (guess + (n / guess)) / 2.0f;
+        if (CP_ABS((newGuess * newGuess) - n) < tolerance) {
+            return newGuess;
+        }
+        guess = newGuess;
+    }
+}
+
+vec2f vec2f_add(vec2f *a, vec2f *b) {
+    return (vec2f){a->x + b->x, a->y + b->y};
+}
+vec2f vec2f_sub(vec2f *a, vec2f *b) {
+    return (vec2f){a->x - b->x, a->y - b->y};
+}
+vec2f vec2f_mul(vec2f *a, vec2f *b) {
+    return (vec2f){a->x * b->x, a->y * b->y};
+}
+vec2f vec2f_div(vec2f *a, vec2f *b) {
+    return (vec2f){a->x / b->x, a->y / b->y};
+}
+
+f32 vec2f_dist(vec2f *v1, vec2f *v2) {
+    f32 a = CP_ABS(v1->x - v2->x);
+    f32 b = CP_ABS(v1->y - v2->y);
+
+    return cp_sqrt((a * a) + (b * b));
+}
+
+f32 vec2f_dist2(vec2f *v1, vec2f *v2) {
+    f32 a = CP_ABS(v1->x - v2->x);
+    f32 b = CP_ABS(v1->y - v2->y);
+
+    return (a * a) + (b * b);
+}
+
+f32 vec2f_dot(vec2f *a, vec2f *b) { return (a->x * b->x) + (a->y * b->y); }
 
 void mat2f_print(mat2f *m) {
     for (int r = 0; r < m->rows; r++) {

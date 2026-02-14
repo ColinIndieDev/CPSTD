@@ -6,9 +6,6 @@
 
 #include <stdio.h>
 
-// Temp
-#include <math.h>
-
 #define CPA_WRITE_STR(f, s) fwrite((s), 1, sizeof(s) - 1, f)
 
 void cpa_write_u16(FILE *f, u16 n) { fwrite(&n, sizeof(u16), 1, f); }
@@ -60,7 +57,7 @@ void cpa_fill_wav(FILE *f, vec_note *notes) {
 
         f32 y = 0.0f;
         if (curNote < notes->size) {
-            y = 0.25f * sinf(t * notes->data[curNote].freq * 2.0f * PI);
+            y = 0.25f * cp_sinf(t * notes->data[curNote].freq * 2.0f * PI);
 
             if (t > curNoteStartTime + notes->data[curNote].dur) {
                 curNote++;
