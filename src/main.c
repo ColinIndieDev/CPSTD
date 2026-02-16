@@ -1,10 +1,13 @@
 #include "../cpaudio/cpa.h"
 #include "../cplterminal/cplt.h"
+#include "../cpstd/cparr.h"
+#include "../cpstd/cprng.h"
 
 void DoCPA();
 void DoCPLT();
+void DoCPRNG();
 
-int main() { DoCPLT(); }
+int main() { DoCPRNG(); }
 
 void DoCPA() {
     vec_note notes;
@@ -68,4 +71,23 @@ void DoCPLT() {
 
         cplt_render();
     }
+}
+
+ARR_DEF(f32, arr_f32)
+
+void DoCPRNG() {
+    cprng_rand_seed();
+
+    arr_f32 arr;
+    arr_f32_init(&arr, 10);
+
+    for (u32 i = 0; i < 10; i++) {
+        *arr_f32_at(&arr, i) = cpm_modf(cprng_randf(), 10);
+    }
+
+    for (u32 i = 0; i < 10; i++) {
+        printf("%f\n", *arr_f32_at(&arr, i));
+    }
+
+    arr_f32_destroy(&arr);
 }

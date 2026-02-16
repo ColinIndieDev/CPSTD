@@ -6,10 +6,10 @@
 
 #define PI 3.14159265358979323846f
 
-#define CP_MIN(x, y) ((x) < (y) ? (x) : (y))
-#define CP_MAX(x, y) ((x) > (y) ? (x) : (y))
-#define CP_ABS(x) ((x) > 0 ? (x) : -(x))
-#define CP_CLAMP(x, n, m) ((x) > (n) ? ((x) < (m) ? (x) : (m)) : (n))
+#define CPM_MIN(x, y) ((x) < (y) ? (x) : (y))
+#define CPM_MAX(x, y) ((x) > (y) ? (x) : (y))
+#define CPM_ABS(x) ((x) > 0 ? (x) : -(x))
+#define CPM_CLAMP(x, n, m) ((x) > (n) ? ((x) < (m) ? (x) : (m)) : (n))
 
 VEC_DEF(f32, vecf)
 
@@ -85,7 +85,7 @@ typedef struct {
     f32 x, y;
 } vec2f;
 
-f32 cp_factorial(i32 n) {
+f32 cpm_factorial(i32 n) {
     if (n == 0 || n == 1) {
         return 1.0f;
     }
@@ -96,7 +96,7 @@ f32 cp_factorial(i32 n) {
     return result;
 }
 
-f32 cp_expf(f32 x) {
+f32 cpm_expf(f32 x) {
     f32 result = 1.0f;
     f32 term = 1.0f;
 
@@ -108,7 +108,7 @@ f32 cp_expf(f32 x) {
     return result;
 }
 
-f32 cp_powf(f32 x, i32 n) {
+f32 cpm_powf(f32 x, i32 n) {
     f32 result = 1.0f;
     for (int i = 0; i < n; i++) {
         result *= x;
@@ -116,7 +116,7 @@ f32 cp_powf(f32 x, i32 n) {
     return n > 0 ? result : 1 / result;
 }
 
-f32 cp_sinf(f32 x) {
+f32 cpm_sinf(f32 x) {
     f32 result = 0.0f;
 
     while (x > PI) {
@@ -128,15 +128,15 @@ f32 cp_sinf(f32 x) {
 
     i32 n = 10;
     for (int i = 0; i < n; i++) {
-        f32 sign = cp_powf(-1, i);
-        f32 num = cp_powf(x, (2 * i) + 1);
-        f32 den = cp_factorial((2 * i) + 1);
+        f32 sign = cpm_powf(-1, i);
+        f32 num = cpm_powf(x, (2 * i) + 1);
+        f32 den = cpm_factorial((2 * i) + 1);
         result += sign * (num / den);
     }
     return result;
 }
 
-f32 cp_cosf(f32 x) {
+f32 cpm_cosf(f32 x) {
     f32 result = 1.0f;
     f32 term = 1.0f;
 
@@ -149,7 +149,7 @@ f32 cp_cosf(f32 x) {
 
     i32 n = 10;
     for (int i = 1; i <= n; i++) {
-        f32 sign = -cp_powf(x, 2);
+        f32 sign = -cpm_powf(x, 2);
         f32 num = 2.0f * (f32)i;
         term *= sign / (num * (num - 1));
         result += term;
@@ -157,15 +157,15 @@ f32 cp_cosf(f32 x) {
     return result;
 }
 
-f32 cp_tanf(f32 x) { return cp_sinf(x) / cp_cosf(x); }
+f32 cpm_tanf(f32 x) { return cpm_sinf(x) / cpm_cosf(x); }
 
-f32 cp_sinhf(f32 x) { return (cp_expf(x) - cp_expf(-x)) / 2; }
+f32 cpm_sinhf(f32 x) { return (cpm_expf(x) - cpm_expf(-x)) / 2; }
 
-f32 cp_coshf(f32 x) { return (cp_expf(x) + cp_expf(-x)) / 2; }
+f32 cpm_coshf(f32 x) { return (cpm_expf(x) + cpm_expf(-x)) / 2; }
 
-f32 cp_tanhf(f32 x) { return cp_sinhf(x) / cp_coshf(x); }
+f32 cpm_tanhf(f32 x) { return cpm_sinhf(x) / cpm_coshf(x); }
 
-f32 cp_sqrt(f32 n) {
+f32 cpm_sqrt(f32 n) {
     if (n < 0) {
         return -1.0f;
     }
@@ -176,11 +176,16 @@ f32 cp_sqrt(f32 n) {
     f32 guess = n / 2.0f;
     while (true) {
         f32 newGuess = (guess + (n / guess)) / 2.0f;
-        if (CP_ABS((newGuess * newGuess) - n) < tolerance) {
+        if (CPM_ABS((newGuess * newGuess) - n) < tolerance) {
             return newGuess;
         }
         guess = newGuess;
     }
+}
+
+f32 cpm_modf(f32 x, f32 y) {
+    u32 fit = (u32)x / (u32)y;
+    return x - (y * (float)fit);
 }
 
 vec2f vec2f_add(vec2f *a, vec2f *b) {
@@ -197,15 +202,15 @@ vec2f vec2f_div(vec2f *a, vec2f *b) {
 }
 
 f32 vec2f_dist(vec2f *v1, vec2f *v2) {
-    f32 a = CP_ABS(v1->x - v2->x);
-    f32 b = CP_ABS(v1->y - v2->y);
+    f32 a = CPM_ABS(v1->x - v2->x);
+    f32 b = CPM_ABS(v1->y - v2->y);
 
-    return cp_sqrt((a * a) + (b * b));
+    return cpm_sqrt((a * a) + (b * b));
 }
 
 f32 vec2f_dist2(vec2f *v1, vec2f *v2) {
-    f32 a = CP_ABS(v1->x - v2->x);
-    f32 b = CP_ABS(v1->y - v2->y);
+    f32 a = CPM_ABS(v1->x - v2->x);
+    f32 b = CPM_ABS(v1->y - v2->y);
 
     return (a * a) + (b * b);
 }

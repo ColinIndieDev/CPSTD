@@ -36,7 +36,7 @@ endif()
 # Is used here but normally never do 
 # it name the files manually
 
-file(GLOB_RECURSE SOURCE_FILES CONFIGURE DEPENDS cpstd/*.c src/*.c cpstd/*.h)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE DEPENDS src/*.c cpstd/*.h cplterminal/*.h cpaudio/*.h)
 message(STATUS "============================================")
 message(STATUS "Included files")
 message(STATUS "============================================")

@@ -57,7 +57,7 @@ void cpa_fill_wav(FILE *f, vec_note *notes) {
 
         f32 y = 0.0f;
         if (curNote < notes->size) {
-            y = 0.25f * cp_sinf(t * notes->data[curNote].freq * 2.0f * PI);
+            y = 0.25f * cpm_sinf(t * notes->data[curNote].freq * 2.0f * PI);
 
             if (t > curNoteStartTime + notes->data[curNote].dur) {
                 curNote++;
