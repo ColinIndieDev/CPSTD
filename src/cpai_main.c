@@ -22,7 +22,7 @@ int main() {
     cpai_load_test_data_network(net, "data/t10k-images.idx3-ubyte",
                                 "data/t10k-labels.idx1-ubyte");
 
-    cpai_train_network(net, 0.05f, 3, 64);
+    cpai_train_network(net, 0.05f, 200, 64);
     cpai_test_network(net);
     cpai_destroy_network(net);
 }

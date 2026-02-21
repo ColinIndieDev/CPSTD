@@ -57,14 +57,14 @@ void cpa_fill_wav(FILE *f, vec_note *notes) {
 
         f32 y = 0.0f;
         if (curNote < notes->size) {
-            y = 0.25f * cpm_sinf(t * notes->data[curNote].freq * 2.0f * PI);
+            y = 0.25f * cpm_sinf(t * notes->data[curNote].freq * 2.0f * CPM_PI);
 
             if (t > curNoteStartTime + notes->data[curNote].dur) {
                 curNote++;
                 curNoteStartTime = t;
             }
         }
-        i16 sample = (i16)(y * INT16_MAX);
+        i16 sample = (i16)(y * CPM_I16_MAX);
 
         cpa_write_u16(f, sample);
     }

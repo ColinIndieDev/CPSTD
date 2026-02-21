@@ -28,7 +28,7 @@ endif()
 #### Release ####
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_compile_options(-g -O3 -DNDEBUG)
+    add_compile_options(-g -O3 -ffast-math -DNDEBUG)
 endif()
 
 #### Linking ####
@@ -52,4 +52,9 @@ add_executable(Example
 )
 
 # math.h
-target_link_libraries(Example m)
+# target_link_libraries(Example m)
+
+# OpenMP
+find_package(OpenMP REQUIRED)
+target_link_libraries(Example PRIVATE OpenMP::OpenMP_C)
+target_compile_options(Example PRIVATE -mavx2 -mfma)
