@@ -12,3 +12,4 @@ _deps
 build
 .cache
 .clang-tidy
+save.bin

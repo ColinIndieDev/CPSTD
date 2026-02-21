@@ -1,17 +1,17 @@
 #pragma once
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define VEC_DEF(type, name)                                                    \
     typedef struct {                                                           \
         type *data;                                                            \
-        size_t size;                                                           \
-        size_t capacity;                                                       \
+        u32 size;                                                              \
+        u32 capacity;                                                          \
     } name;                                                                    \
-    void name##_init(name *vec, size_t size, type val) {                       \
+    void name##_init(name *vec, u32 size, type val) {                          \
         vec->capacity = size > 10 ? size * 2 : 10;                             \
         vec->data = malloc(vec->capacity * sizeof(type));                      \
         vec->size = size;                                                      \
@@ -19,17 +19,17 @@
             vec->data[i] = val;                                                \
         }                                                                      \
     }                                                                          \
-    void name##_reserve(name *vec, size_t size) {                              \
+    void name##_reserve(name *vec, u32 size) {                                 \
         vec->capacity = size;                                                  \
         vec->data = malloc(vec->capacity * sizeof(type));                      \
         vec->size = 0;                                                         \
     }                                                                          \
-    type *name##_at(name *vec, size_t i) {                                     \
+    type *name##_at(name *vec, u32 i) {                                        \
         assert("Out of bounds or not initialized" && 0 <= i &&                 \
                i < vec->size && vec->size > 0);                                \
         return &vec->data[i];                                                  \
     }                                                                          \
-    type name##_get(name *vec, size_t i) {                                     \
+    type name##_get(name *vec, u32 i) {                                        \
         assert("Out of bounds or not initialized" && 0 <= i &&                 \
                i < vec->size && vec->size > 0);                                \
         return vec->data[i];                                                   \
@@ -37,7 +37,12 @@
     void name##_push_back(name *vec, type val) {                               \
         if (vec->size >= vec->capacity) {                                      \
             vec->capacity *= 2;                                                \
-            vec->data = realloc(vec->data, vec->capacity * sizeof(type));      \
+            type *temp = realloc(vec->data, vec->capacity * sizeof(type));     \
+            if (!(b8)temp) {                                                   \
+                fprintf(stderr, "[CPVEC] [ERROR]: realloc failed\n");          \
+                return;                                                        \
+            }                                                                  \
+            vec->data = temp;                                                  \
         }                                                                      \
         vec->data[vec->size] = val;                                            \
         vec->size++;                                                           \
@@ -60,7 +65,7 @@
         memmove(&vec->data[0], &vec->data[1], (vec->size - 1) * sizeof(type)); \
         vec->size--;                                                           \
     }                                                                          \
-    void name##_delete(name *vec, size_t i) {                                  \
+    void name##_delete(name *vec, u32 i) {                                     \
         assert("Out of bounds or not initialized" && 0 <= i &&                 \
                i < vec->size && vec->size > 0);                                \
         memmove(&vec->data[i], &vec->data[i + 1],                              \
@@ -72,7 +77,7 @@
         vec->size = 0;                                                         \
         vec->capacity = 0;                                                     \
     }                                                                          \
-    void name##_set(name *vec, size_t i, type val) {                           \
+    void name##_set(name *vec, u32 i, type val) {                              \
         assert("Out of bounds or not initialized" && 0 <= i &&                 \
                i < vec->size && vec->size > 0);                                \
         vec->data[i] = val;                                                    \

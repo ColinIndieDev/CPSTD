@@ -1,7 +1,5 @@
 #pragma once
 
-#include "cpbase.h"
-
 #define ARR_DEF(type, name)                                                    \
     typedef struct {                                                           \
         type *data;                                                            \

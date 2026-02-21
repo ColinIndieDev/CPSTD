@@ -2,9 +2,11 @@
 
 #include "cpbase.h"
 #include "cpvec.h"
-#include <string.h>
 
-#define PI 3.14159265358979323846f
+#define CPM_PI 3.14159265358979323846f
+
+#define CPM_F32_MAX 3.402823466e+38f
+#define CPM_U32_MAX 4294967295
 
 #define CPM_MIN(x, y) ((x) < (y) ? (x) : (y))
 #define CPM_MAX(x, y) ((x) > (y) ? (x) : (y))
@@ -19,7 +21,7 @@ typedef struct {
 } mat2f;
 
 void mat2f_init(mat2f *m, u32 rows, u32 cols, f32 val) {
-    vecf_init(&m->data, rows * cols, val);
+    vecf_init(&m->data, (u64)rows * cols, val);
     m->rows = rows;
     m->cols = cols;
 }
@@ -36,14 +38,22 @@ f32 mat2f_get(mat2f *m, u32 row, u32 col) {
     return m->data.data[(row * m->cols) + col];
 }
 
-f32 *mat2f_row_ptr(mat2f *m, u32 row) { return &m->data.data[row * m->cols]; }
+f32 *mat2f_row_ptr(mat2f *m, u32 row) {
+    return &m->data.data[(u64)row * m->cols];
+}
 void mat2f_get_row(mat2f *m, u32 row, f32 *out) {
-    assert(r < m->rows);
+    assert(row < m->rows);
 
-    memcpy(out, &m->data.data[row * m->cols], m->cols * sizeof(f32));
+    memcpy(out, &m->data.data[(u64)row * m->cols], m->cols * sizeof(f32));
 }
 
 u32 mat2f_size(mat2f *m) { return m->data.size; }
+
+void mat2f_destroy(mat2f *m) {
+    vecf_destroy(&m->data);
+    m->rows = 0;
+    m->cols = 0;
+}
 
 void mat2f_add(mat2f *m1, mat2f *m2, mat2f *out) {
     assert(m1->rows == m2->rows && m1->cols == m2->cols &&
@@ -97,15 +107,26 @@ f32 cpm_factorial(i32 n) {
 }
 
 f32 cpm_expf(f32 x) {
-    f32 result = 1.0f;
-    f32 term = 1.0f;
-
-    i32 termsCount = 20;
-    for (int n = 1; n <= termsCount; n++) {
-        term *= x / (f32)n;
-        result += term;
+    if (x > 88.0f) {
+        return CPM_F32_MAX;
     }
-    return result;
+    if (x < -88.0f) {
+        return 0.0f;
+    }
+
+    f32 ln2 = 0.693147180559945f;
+    i32 k = (i32)((x / ln2) + 0.5f);
+    f32 r = x - ((f32)k * ln2);
+
+    f32 result = 1.0f + r + ((r * r) / 2.0f) + ((r * r * r) / 6.0f) +
+                 ((r * r * r * r) / 24.0f) + ((r * r * r * r * r) / 120.0f) +
+                 ((r * r * r * r * r * r) / 720.0f);
+
+    i32 bits = (k + 127) << 23;
+    f32 pow2k;
+    memcpy(&pow2k, &bits, sizeof(f32));
+
+    return result * pow2k;
 }
 
 f32 cpm_powf(f32 x, i32 n) {
@@ -119,11 +140,11 @@ f32 cpm_powf(f32 x, i32 n) {
 f32 cpm_sinf(f32 x) {
     f32 result = 0.0f;
 
-    while (x > PI) {
-        x -= 2 * PI;
+    while (x > CPM_PI) {
+        x -= 2 * CPM_PI;
     }
-    while (x < -PI) {
-        x += 2 * PI;
+    while (x < -CPM_PI) {
+        x += 2 * CPM_PI;
     }
 
     i32 n = 10;
@@ -140,11 +161,11 @@ f32 cpm_cosf(f32 x) {
     f32 result = 1.0f;
     f32 term = 1.0f;
 
-    while (x > PI) {
-        x -= 2 * PI;
+    while (x > CPM_PI) {
+        x -= 2 * CPM_PI;
     }
-    while (x < -PI) {
-        x += 2 * PI;
+    while (x < -CPM_PI) {
+        x += 2 * CPM_PI;
     }
 
     i32 n = 10;
@@ -174,18 +195,38 @@ f32 cpm_sqrt(f32 n) {
     }
     f32 tolerance = 1e-5f;
     f32 guess = n / 2.0f;
-    while (true) {
+    for (u32 i = 0; i < 100; i++) {
         f32 newGuess = (guess + (n / guess)) / 2.0f;
         if (CPM_ABS((newGuess * newGuess) - n) < tolerance) {
             return newGuess;
         }
         guess = newGuess;
     }
+    return guess;
+}
+
+f32 cpm_logf(f32 x) {
+    if (x <= 0) {
+        return -CPM_F32_MAX;
+    }
+    f32 y = x - 1.0f;
+    for (i32 i = 0; i < 100; i++) {
+        f32 ey = cpm_expf(y);
+        y -= (ey - x) / ey;
+    }
+    return y;
 }
 
 f32 cpm_modf(f32 x, f32 y) {
     u32 fit = (u32)x / (u32)y;
     return x - (y * (float)fit);
+}
+
+f32 cpm_floorf(f32 x) { return (f32)((i32)x); }
+
+f32 cpm_ceilf(f32 x) {
+
+    return x > (f32)((i32)x) ? (f32)((i32)x + 1) : (f32)((i32)x);
 }
 
 vec2f vec2f_add(vec2f *a, vec2f *b) {
@@ -228,4 +269,13 @@ void mat2f_print(mat2f *m) {
         }
         printf("\n");
     }
+}
+
+b8 cpm_isnan(f32 x) {
+    /* Prevent this being changed
+     * by compiler optimizations
+     * (fastmath)
+     */
+    volatile f32 y = x;
+    return (b8)(y != y);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cpbase.h"
+#include "cpmath.h"
 #include <bits/time.h>
 #include <time.h>
 
@@ -36,7 +37,7 @@ void cprng_rand_seedr(cprng_state *rng) {
 void cprng_rand_seed() { cprng_rand_seedr(&rng_state); }
 
 f32 cprng_randfr(cprng_state *rng) {
-    return (f32)cprng_randr(rng) / (f32)UINT32_MAX;
+    return (f32)cprng_randr(rng) / (f32)CPM_U32_MAX;
 }
 
 void cprng_seedr(cprng_state *rng, u64 state, u64 seq) {
@@ -51,6 +52,14 @@ void cprng_seed(u64 state, u64 seq) { cprng_seedr(&rng_state, state, seq); }
 
 u32 cprng_rand() { return cprng_randr(&rng_state); }
 
-f32 cprng_randfp() { return cprng_randfr(&rng_state); }
+u32 cprnr_rand_range(u32 min, u32 max) {
+    return min + (cprng_rand() % (max - min + 1));
+}
 
-f32 cprng_randf() { return (f32)(cprng_rand() / 100000) + cprng_randfp(); }
+f32 cprng_randf_norm() { return cprng_randfr(&rng_state); }
+
+f32 cprng_randf() { return cpm_floorf((f32)cprng_rand() / 100000.0f) + cprng_randf_norm(); }
+
+f32 cprng_randf_range(f32 min, f32 max) {
+    return min + (cprng_randf_norm() * (max - min));
+}
