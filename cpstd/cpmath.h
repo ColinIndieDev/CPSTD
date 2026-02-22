@@ -19,44 +19,44 @@ VEC_DEF(f32, vecf)
 typedef struct {
     vecf data;
     u32 rows, cols;
-} mat2f;
+} mat2D;
 
-void mat2f_init(mat2f *m, u32 rows, u32 cols, f32 val) {
+void mat2D_init(mat2D *m, u32 rows, u32 cols, f32 val) {
     vecf_init(&m->data, (u64)rows * cols, val);
     m->rows = rows;
     m->cols = cols;
 }
 
-f32 *mat2f_at(mat2f *m, u32 row, u32 col) {
+f32 *mat2D_at(mat2D *m, u32 row, u32 col) {
     assert(row < m->rows && col < m->cols);
 
     return &m->data.data[(row * m->cols) + col];
 }
 
-f32 mat2f_get(mat2f *m, u32 row, u32 col) {
+f32 mat2D_get(mat2D *m, u32 row, u32 col) {
     assert(row < m->rows && col < m->cols);
 
     return m->data.data[(row * m->cols) + col];
 }
 
-f32 *mat2f_row_ptr(mat2f *m, u32 row) {
+f32 *mat2D_row_ptr(mat2D *m, u32 row) {
     return &m->data.data[(u64)row * m->cols];
 }
-void mat2f_get_row(mat2f *m, u32 row, f32 *out) {
+void mat2D_get_row(mat2D *m, u32 row, f32 *out) {
     assert(row < m->rows);
 
     memcpy(out, &m->data.data[(u64)row * m->cols], m->cols * sizeof(f32));
 }
 
-u32 mat2f_size(mat2f *m) { return m->data.size; }
+u32 mat2D_size(mat2D *m) { return m->data.size; }
 
-void mat2f_destroy(mat2f *m) {
+void mat2D_destroy(mat2D *m) {
     vecf_destroy(&m->data);
     m->rows = 0;
     m->cols = 0;
 }
 
-void mat2f_add(mat2f *m1, mat2f *m2, mat2f *out) {
+void mat2D_add(mat2D *m1, mat2D *m2, mat2D *out) {
     assert(m1->rows == m2->rows && m1->cols == m2->cols &&
            out->rows == m1->rows && out->cols == m1->cols);
 
@@ -64,7 +64,7 @@ void mat2f_add(mat2f *m1, mat2f *m2, mat2f *out) {
         out->data.data[i] = m1->data.data[i] + m2->data.data[i];
     }
 }
-void mat2f_sub(mat2f *m1, mat2f *m2, mat2f *out) {
+void mat2D_sub(mat2D *m1, mat2D *m2, mat2D *out) {
     assert(m1->rows == m2->rows && m1->cols == m2->cols &&
            out->rows == m1->rows && out->cols == m1->cols);
 
@@ -72,7 +72,7 @@ void mat2f_sub(mat2f *m1, mat2f *m2, mat2f *out) {
         out->data.data[i] = m1->data.data[i] - m2->data.data[i];
     }
 }
-void mat2f_mul(mat2f *m1, mat2f *m2, mat2f *out) {
+void mat2D_mul(mat2D *m1, mat2D *m2, mat2D *out) {
     assert(m1->rows == m2->rows && m1->cols == m2->cols &&
            out->rows == m1->rows && out->cols == m1->cols);
 
@@ -80,7 +80,7 @@ void mat2f_mul(mat2f *m1, mat2f *m2, mat2f *out) {
         out->data.data[i] = m1->data.data[i] * m2->data.data[i];
     }
 }
-void mat2f_div(mat2f *m1, mat2f *m2, mat2f *out) {
+void mat2D_div(mat2D *m1, mat2D *m2, mat2D *out) {
     assert(m1->rows == m2->rows && m1->cols == m2->cols &&
            out->rows == m1->rows && out->cols == m1->cols);
 
@@ -259,10 +259,10 @@ f32 vec2f_dist2(vec2f *v1, vec2f *v2) {
 
 f32 vec2f_dot(vec2f *a, vec2f *b) { return (a->x * b->x) + (a->y * b->y); }
 
-void mat2f_print(mat2f *m) {
+void mat2D_print(mat2D *m) {
     for (int r = 0; r < m->rows; r++) {
         for (int c = 0; c < m->cols; c++) {
-            printf("%f", *mat2f_at(m, r, c));
+            printf("%f", *mat2D_at(m, r, c));
 
             if (c < m->cols - 1) {
                 printf(", ");

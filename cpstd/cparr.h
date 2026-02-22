@@ -13,4 +13,9 @@
     void name##_destroy(name *arr) {                                           \
         free(arr->data);                                                       \
         arr->size = 0;                                                         \
-    }
+    }                                                                          \
+    type *name##_begin(name *arr) { return arr->data; }                        \
+    type *name##_end(name *arr) { return arr->data + arr->size; }
+
+#define FOREACH_ARR(type, it, arrname, arrptr)                                 \
+    for (type *it = arrname##_begin(arrptr); it != arrname##_end(arrptr); it++)

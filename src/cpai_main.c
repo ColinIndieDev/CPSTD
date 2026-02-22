@@ -13,16 +13,15 @@ int main() {
         cpai_create_network(784, hs_neurons, 10, h_activations, Softmax, CEL,
                             0.9f, 0.99f, 0.1f, true);
     cpai_init_weights(net);
-    net->save_path = "save.bin";
 
-    cpai_load_network_bin(net, "save.bin");
+    cpai_load_network_bin(net, net->save_path);
 
     cpai_load_train_data_network(net, "data/train-images.idx3-ubyte",
                                  "data/train-labels.idx1-ubyte", 10);
     cpai_load_test_data_network(net, "data/t10k-images.idx3-ubyte",
                                 "data/t10k-labels.idx1-ubyte");
 
-    cpai_train_network(net, 0.05f, 200, 64);
+    // cpai_train_network(net, 0.05f, 200, 64);
     cpai_test_network(net);
     cpai_destroy_network(net);
 }

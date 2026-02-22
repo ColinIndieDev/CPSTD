@@ -1,9 +1,9 @@
 #pragma once
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #define VEC_DEF(type, name)                                                    \
     typedef struct {                                                           \
@@ -81,4 +81,9 @@
         assert("Out of bounds or not initialized" && 0 <= i &&                 \
                i < vec->size && vec->size > 0);                                \
         vec->data[i] = val;                                                    \
-    }
+    }                                                                          \
+    type *name##_begin(name *v) { return v->data; }                            \
+    type *name##_end(name *v) { return v->data + v->size; }
+
+#define FOREACH_VEC(type, it, vname, vptr)                                     \
+    for (type *it = vname##_begin(vptr); it != vname##_end(vptr); it++)

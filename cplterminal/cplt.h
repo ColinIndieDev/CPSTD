@@ -1,6 +1,4 @@
 #include <fcntl.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,20 +8,20 @@
 
 #include "../cpstd/cpbase.h"
 
-int width = 0;
-int height = 0;
-char *screenBuffer;
-int *colorBuffer;
-char bgColor[22] = "\x1b[48;2;0;0;0m";
+i32 width = 0;
+i32 height = 0;
+i8 *screen_buf;
+i32 *col_buf;
+i8 bg_col[22] = "\x1b[48;2;0;0;0m";
 
 bool running = true;
 
-int nbFrames = 0;
-int fps = 0;
-float lastFrame = 0.0f;
-float lastFPS = 0.0f;
-float timeScale = 1.0f;
-float dt = 0.0f;
+i32 nb_frames = 0;
+i32 fps = 0;
+f32 last_frame = 0.0f;
+f32 last_fps = 0.0f;
+f32 time_scale = 1.0f;
+f32 dt = 0.0f;
 
 #define CPLT_DEF_COLOR "\x1b[0m"
 #define WHITE (rgb){255, 255, 255}
@@ -71,41 +69,41 @@ void cplt_hide_cursor(bool hide) {
     }
 }
 
-void cplt_init(int w, int h) {
+void cplt_init(i32 w, i32 h) {
     width = w;
     height = h;
-    screenBuffer = malloc((size_t)width * height);
-    colorBuffer = malloc((size_t)width * height * sizeof(int));
-    memset(screenBuffer, ' ', (size_t)width * height);
-    memset(colorBuffer, 0, (size_t)width * height * sizeof(int));
+    screen_buf = malloc((size_t)width * height);
+    col_buf = malloc((size_t)width * height * sizeof(i32));
+    memset(screen_buf, ' ', (size_t)width * height);
+    memset(col_buf, 0, (size_t)width * height * sizeof(i32));
 
     printf("\x1b[2J");
     cplt_hide_cursor(true);
     cplt_activate_raw_mode();
 }
 
-float cplt_get_time() {
+f32 cplt_get_time() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (float)ts.tv_sec + ((float)ts.tv_nsec / 1e9f);
+    return (f32)ts.tv_sec + ((f32)ts.tv_nsec / 1e9f);
 }
 
-float cplt_get_dt() { return dt; }
+f32 cplt_get_dt() { return dt; }
 
 void cplt_calc_fps() {
-    float curTime = cplt_get_time();
-    nbFrames++;
-    if (curTime - lastFPS >= 1.0) {
-        fps = nbFrames;
-        nbFrames = 0;
-        lastFPS = curTime;
+    f32 curTime = cplt_get_time();
+    nb_frames++;
+    if (curTime - last_fps >= 1.0) {
+        fps = nb_frames;
+        nb_frames = 0;
+        last_fps = curTime;
     }
 }
 
 void cplt_calc_dt() {
-    float curFrame = cplt_get_time();
-    dt = (curFrame - lastFrame) * timeScale;
-    lastFrame = curFrame;
+    f32 curFrame = cplt_get_time();
+    dt = (curFrame - last_frame) * time_scale;
+    last_frame = curFrame;
 }
 
 bool cplt_check_collision_rects(rect *a, rect *b) {
@@ -121,18 +119,18 @@ bool cplt_check_collision_rects(rect *a, rect *b) {
 bool keyDown[CPLT_MAX_KEYS] = {false};
 bool keyPressed[CPLT_MAX_KEYS] = {false};
 bool keyReleased[CPLT_MAX_KEYS] = {false};
-float keyTimers[CPLT_MAX_KEYS] = {0};
+f32 keyTimers[CPLT_MAX_KEYS] = {0};
 
 void cplt_update_input() {
-    float now = cplt_get_time();
+    f32 now = cplt_get_time();
 
     memset(keyPressed, false, sizeof(keyPressed));
     memset(keyReleased, false, sizeof(keyReleased));
 
-    char buf[64];
-    int n;
+    i8 buf[64];
+    i32 n;
     while ((n = (i32)read(STDIN_FILENO, buf, sizeof(buf))) > 0) {
-        for (int i = 0; i < n; i++) {
+        for (i32 i = 0; i < n; i++) {
             u8 uc = (u8)buf[i];
             if (!keyDown[uc]) {
                 keyPressed[uc] = true;
@@ -142,7 +140,7 @@ void cplt_update_input() {
         }
     }
 
-    for (int i = 0; i < CPLT_MAX_KEYS; i++) {
+    for (i32 i = 0; i < CPLT_MAX_KEYS; i++) {
         if (keyDown[i] && (now - keyTimers[i] > CPLT_KEY_TIMEOUT)) {
             keyDown[i] = false;
             keyReleased[i] = true;
@@ -150,57 +148,57 @@ void cplt_update_input() {
     }
 }
 
-bool cplt_is_key_down(char key) { return keyDown[(u8)key]; }
+bool cplt_is_key_down(i8 key) { return keyDown[(u8)key]; }
 
-bool cplt_is_key_pressed(char key) { return keyPressed[(u8)key]; }
+bool cplt_is_key_pressed(i8 key) { return keyPressed[(u8)key]; }
 
-bool cplt_is_key_released(char key) { return keyReleased[(u8)key]; }
+bool cplt_is_key_released(i8 key) { return keyReleased[(u8)key]; }
 
 // }}}
 
-int cplt_rgb_to_int(rgb color) {
+i32 cplt_rgb_to_i32(rgb color) {
     return (color.r << 16) | (color.g << 8) | color.b;
 }
 
 // {{{ Drawing
 
 void cplt_render() {
-    int lineBufSize = (width * 22) + 64;
-    char *line = malloc((size_t)lineBufSize);
+    i32 lineBufSize = (width * 22) + 64;
+    i8 *line = malloc((size_t)lineBufSize);
     if (!line) {
         return;
     }
 
-    int totalSize = ((lineBufSize + 8) * height) + 64;
-    char *out = malloc((size_t)totalSize);
+    i32 totalSize = ((lineBufSize + 8) * height) + 64;
+    i8 *out = malloc((size_t)totalSize);
     if (!out) {
         free(line);
         return;
     }
-    int outPos = 0;
+    i32 outPos = 0;
 
     outPos += snprintf(out + outPos, (size_t)(totalSize - outPos), "\x1b[H");
 
-    for (int y = 0; y < height; y++) {
-        int pos = 0;
+    for (i32 y = 0; y < height; y++) {
+        i32 pos = 0;
 
-        pos += snprintf(line + pos, (size_t)(lineBufSize - pos), "%s", bgColor);
-        int lastColor = -1;
+        pos += snprintf(line + pos, (size_t)(lineBufSize - pos), "%s", bg_col);
+        i32 lastColor = -1;
 
-        for (int x = 0; x < width; x++) {
-            int idx = (y * width) + x;
-            int packedColor = colorBuffer[idx];
+        for (i32 x = 0; x < width; x++) {
+            i32 idx = (y * width) + x;
+            i32 packedColor = col_buf[idx];
 
             if (packedColor != lastColor) {
-                int r = (packedColor >> 16) & 0xFF;
-                int g = (packedColor >> 8) & 0xFF;
-                int b = packedColor & 0xFF;
+                i32 r = (packedColor >> 16) & 0xFF;
+                i32 g = (packedColor >> 8) & 0xFF;
+                i32 b = packedColor & 0xFF;
                 pos += snprintf(line + pos, (size_t)(lineBufSize - pos),
                                 "\x1b[38;2;%d;%d;%dm", r, g, b);
                 lastColor = packedColor;
             }
 
-            char c = screenBuffer[idx];
+            i8 c = screen_buf[idx];
             if (c < 32 || c == 127) {
                 c = ' ';
             }
@@ -224,11 +222,11 @@ void cplt_render() {
     free(out);
 }
 
-void cplt_clear(char c, rgb color) {
+void cplt_clear(i8 c, rgb color) {
     for (size_t y = 0; y < height; y++) {
         for (size_t x = 0; x < width; x++) {
-            screenBuffer[(y * width) + x] = c;
-            colorBuffer[(y * width) + x] = cplt_rgb_to_int(color);
+            screen_buf[(y * width) + x] = c;
+            col_buf[(y * width) + x] = cplt_rgb_to_i32(color);
         }
     }
 }
@@ -237,63 +235,63 @@ void cplt_clear_bg(rgb color) {
     color.r = color.r < 0 ? 0 : color.r % 256;
     color.g = color.g < 0 ? 0 : color.g % 256;
     color.b = color.b < 0 ? 0 : color.b % 256;
-    snprintf(bgColor, sizeof(bgColor), "\x1b[48;2;%d;%d;%dm", color.r, color.g,
+    snprintf(bg_col, sizeof(bg_col), "\x1b[48;2;%d;%d;%dm", color.r, color.g,
              color.b);
 }
 
-void cplt_draw_pixel(int x, int y, const char *c, rgb color) {
+void cplt_draw_pixel(i32 x, i32 y, const i8 *c, rgb color) {
     if (x < width && x >= 0 && y < height && y >= 0) {
-        screenBuffer[(y * width) + x] = c[0];
-        colorBuffer[(y * width) + x] = cplt_rgb_to_int(color);
+        screen_buf[(y * width) + x] = c[0];
+        col_buf[(y * width) + x] = cplt_rgb_to_i32(color);
     }
 }
 
-void cplt_draw_text(int x, int y, char *text, rgb color) {
+void cplt_draw_text(i32 x, i32 y, i8 *text, rgb color) {
     if (y < 0 || y >= height) {
         return;
     }
-    int len = (int)strlen(text);
+    i32 len = (i32)strlen(text);
     if (x >= width || x + len <= 0) {
         return;
     }
 
-    int start = 0;
+    i32 start = 0;
     if (x < 0) {
         start = -x;
         x = 0;
     }
-    int end = len;
+    i32 end = len;
     if (x + (end - start) > width) {
         end = start + (width - x);
     }
 
-    for (int i = start; i < end; i++) {
+    for (i32 i = start; i < end; i++) {
         cplt_draw_pixel(x + (i - start), y, &text[i], color);
     }
 }
 
-void cplt_draw_rect(int x, int y, int w, int h, char *c, rgb color) {
-    for (int iy = y; iy < h + y; iy++) {
+void cplt_draw_rect(i32 x, i32 y, i32 w, i32 h, i8 *c, rgb color) {
+    for (i32 iy = y; iy < h + y; iy++) {
         if (iy >= height || iy < 0) {
             continue;
         }
-        for (int ix = x; ix < w + x; ix++) {
+        for (i32 ix = x; ix < w + x; ix++) {
             cplt_draw_pixel(ix, iy, c, color);
         }
     }
 }
 
-void cplt_draw_circle(int cx, int cy, int r, char *c, rgb color) {
-    int x = 0;
-    int y = r;
-    int d = 1 - r;
+void cplt_draw_circle(i32 cx, i32 cy, i32 r, i8 *c, rgb color) {
+    i32 x = 0;
+    i32 y = r;
+    i32 d = 1 - r;
 
     while (x <= y) {
-        for (int i = cx - x; i <= cx + x; i++) {
+        for (i32 i = cx - x; i <= cx + x; i++) {
             cplt_draw_pixel(i, cy + y, c, color);
             cplt_draw_pixel(i, cy - y, c, color);
         }
-        for (int i = cx - y; i <= cx + y; i++) {
+        for (i32 i = cx - y; i <= cx + y; i++) {
             cplt_draw_pixel(i, cy + x, c, color);
             cplt_draw_pixel(i, cy - x, c, color);
         }
@@ -307,10 +305,10 @@ void cplt_draw_circle(int cx, int cy, int r, char *c, rgb color) {
     }
 }
 
-void cplt_draw_circle_out(int cx, int cy, int r, char *c, rgb color) {
-    int x = 0;
-    int y = r;
-    int d = 1 - r;
+void cplt_draw_circle_out(i32 cx, i32 cy, i32 r, i8 *c, rgb color) {
+    i32 x = 0;
+    i32 y = r;
+    i32 d = 1 - r;
 
     while (x <= y) {
         cplt_draw_pixel(cx + x, cy + y, c, color);

@@ -13,3 +13,7 @@ build
 .cache
 .clang-tidy
 save.bin
+saves
+data
+external
+shaders

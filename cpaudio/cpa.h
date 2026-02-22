@@ -22,16 +22,16 @@ typedef struct {
 VEC_DEF(note, vec_note);
 
 void cpa_fill_wav(FILE *f, vec_note *notes) {
-    f32 duration = 0;
+    f32 dur = 0;
 
     for (size_t i = 0; i < notes->size; i++) {
-        duration += notes->data[i].dur;
+        dur += notes->data[i].dur;
     }
 
     int freq = 44100;
-    u32 sampleCount = (u32)duration * freq;
+    u32 sample_cnt = (u32)dur * freq;
     u32 defaultFlagSize = 44;
-    u32 wavSize = (sampleCount * sizeof(u16)) + 44;
+    u32 wavSize = (sample_cnt * sizeof(u16)) + 44;
 
     CPA_WRITE_STR(f, "RIFF");
     cpa_write_u32(f, wavSize - 8);
@@ -47,21 +47,21 @@ void cpa_fill_wav(FILE *f, vec_note *notes) {
     cpa_write_u16(f, sizeof(u16) * 8);
 
     CPA_WRITE_STR(f, "data");
-    cpa_write_u32(f, sampleCount * sizeof(u16));
+    cpa_write_u32(f, sample_cnt * sizeof(u16));
 
-    u32 curNote = 0;
-    f32 curNoteStartTime = 0.0f;
+    u32 cur_note = 0;
+    f32 cur_note_start = 0.0f;
 
-    for (int i = 0; i < sampleCount; i++) {
+    for (int i = 0; i < sample_cnt; i++) {
         f32 t = (f32)i / (f32)freq;
 
         f32 y = 0.0f;
-        if (curNote < notes->size) {
-            y = 0.25f * cpm_sinf(t * notes->data[curNote].freq * 2.0f * CPM_PI);
+        if (cur_note < notes->size) {
+            y = 0.25f * cpm_sinf(t * notes->data[cur_note].freq * 2.0f * CPM_PI);
 
-            if (t > curNoteStartTime + notes->data[curNote].dur) {
-                curNote++;
-                curNoteStartTime = t;
+            if (t > cur_note_start + notes->data[cur_note].dur) {
+                cur_note++;
+                cur_note_start = t;
             }
         }
         i16 sample = (i16)(y * CPM_I16_MAX);

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.31)
 project(Example)
 
 # C
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #### Debug ####
@@ -31,12 +33,38 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-g -O3 -ffast-math -DNDEBUG)
 endif()
 
+#### Dependencies (CPL) ####
+include(FetchContent)
+
+# GLFW
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG master
+)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(glfw)
+
+# CGLM
+FetchContent_Declare(
+    cglm
+    GIT_REPOSITORY https://github.com/recp/cglm.git
+    GIT_TAG master
+)
+
+FetchContent_MakeAvailable(cglm)
+
+# GLAD
+add_subdirectory(external/glad)
+
 #### Linking ####
 
 # Is used here but normally never do 
 # it name the files manually
 
-file(GLOB_RECURSE SOURCE_FILES CONFIGURE DEPENDS cpstd/*.h cplterminal/*.h cpaudio/*.h)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE DEPENDS cpstd/*.h cplterminal/*.h cpaudio/*.h cpai/*.h cplibrary/*.h)
 message(STATUS "============================================")
 message(STATUS "Included files")
 message(STATUS "============================================")
@@ -47,7 +75,7 @@ foreach(f IN LISTS SOURCE_FILES)
 endforeach()
 
 add_executable(Example
-    src/cpai_main.c
+    src/cpl_main.c
     ${SOURCE_FILES}
 )
 
@@ -56,5 +84,5 @@ add_executable(Example
 
 # OpenMP
 find_package(OpenMP REQUIRED)
-target_link_libraries(Example PRIVATE OpenMP::OpenMP_C)
+target_link_libraries(Example PRIVATE OpenMP::OpenMP_C glfw glad cglm_headers)
 target_compile_options(Example PRIVATE -mavx2 -mfma)
