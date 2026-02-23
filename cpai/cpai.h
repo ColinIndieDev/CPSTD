@@ -47,7 +47,6 @@ typedef enum {
     Linear
 } activation_type;
 typedef enum { MSE, CEL } loss_type;
-typedef enum { Input, Hidden, Output } layer_type;
 
 typedef struct {
     i32 neurons;
@@ -97,7 +96,7 @@ typedef struct {
     f32 momentum;
     f32 learn_rate_decay;
     f32 label_smooth_rate;
-    b8 use_label_smooth;
+    b8 use_avx2;
 
     i32 cur_epoch;
 
@@ -114,7 +113,7 @@ neural_network *cpai_create_network(i32 i_neurons, veci hs_neurons,
                                     activation_type output_actiation,
                                     loss_type output_loss, f32 momentum,
                                     f32 learn_rate_decay, f32 label_smooth_rate,
-                                    b8 use_label_smooth) {
+                                    b8 use_avx2) {
     neural_network *net = malloc(sizeof(neural_network));
 
     net->i_layer.neurons = i_neurons;
@@ -164,7 +163,7 @@ neural_network *cpai_create_network(i32 i_neurons, veci hs_neurons,
     net->momentum = momentum;
     net->learn_rate_decay = learn_rate_decay;
     net->label_smooth_rate = label_smooth_rate;
-    net->use_label_smooth = use_label_smooth;
+    net->use_avx2 = use_avx2;
     net->cur_epoch = 0;
 
     net->save_path = "save.bin";
@@ -462,13 +461,8 @@ void cpai_load_train_data_network(neural_network *net, char *data_path,
         i32 label = veci_get(&net->train_labels, sample);
 
         for (u32 col = 0; col < sol_row_len; col++) {
-            f32 one_hot = 1.0f;
-            f32 not_hot = 0.0f;
-            if (net->use_label_smooth) {
-                one_hot = 1.0f - net->label_smooth_rate;
-                not_hot = net->label_smooth_rate / ((f32)sol_row_len - 1.0f);
-            }
-
+            f32 one_hot = 1.0f - net->label_smooth_rate;
+            f32 not_hot = net->label_smooth_rate / ((f32)sol_row_len - 1.0f);
             *mat2D_at(&net->train_sol, sample, col) =
                 col == label ? one_hot : not_hot;
         }
@@ -584,7 +578,7 @@ static f32 cpai_network_func_deriv(f32 x, activation_type a_type) {
 
 // {{{ Forwardpropagation
 
-vecf cpai_feed_forward(neural_network *net, vecf *input) {
+vecf cpai_feed_forward_avx2(neural_network *net, vecf *input) {
     vecf output;
     vecf_init(&output, net->o_layer.neurons, 0.0f);
     u32 hid_layer_cnt = net->h_layers.size;
@@ -627,7 +621,9 @@ vecf cpai_feed_forward(neural_network *net, vecf *input) {
     }
     vec_vecf_destroy(&hidden);
     return output;
-    /*
+}
+
+vecf cpai_feed_forward(neural_network *net, vecf *input) {
     vecf output;
     vecf_init(&output, net->o_layer.neurons, 0.0f);
 
@@ -688,7 +684,6 @@ vecf cpai_feed_forward(neural_network *net, vecf *input) {
     vec_vecf_destroy(&hidden);
 
     return output;
-    */
 }
 
 // }}}
@@ -714,8 +709,8 @@ void cpai_reset_gradients(neural_network *net) {
     }
 }
 
-void cpai_calc_output(neural_network *net, vec_vecf *hidden, vec_vecf *hidden_z,
-                      vecf *output, vecf *input) {
+void cpai_calc_output_avx2(neural_network *net, vec_vecf *hidden,
+                           vec_vecf *hidden_z, vecf *output, vecf *input) {
     i32 outputNeuronCount = net->o_layer.neurons;
     i32 hiddenLayerCount = (i32)net->h_layers.size;
     for (u32 l = 0; l < hiddenLayerCount; l++) {
@@ -737,7 +732,10 @@ void cpai_calc_output(neural_network *net, vec_vecf *hidden, vec_vecf *hidden_z,
                                 last_h->data, last_h->size);
         *vecf_at(output, o) = sum;
     }
-    /*
+}
+
+void cpai_calc_output(neural_network *net, vec_vecf *hidden, vec_vecf *hidden_z,
+                      vecf *output, vecf *input) {
     i32 outputNeuronCount = net->o_layer.neurons;
     i32 hiddenLayerCount = (i32)net->h_layers.size;
 
@@ -771,7 +769,6 @@ void cpai_calc_output(neural_network *net, vec_vecf *hidden, vec_vecf *hidden_z,
         }
         *vecf_at(output, o) = sum;
     }
-    */
 }
 
 void cpai_calc_delta(neural_network *net, vec_vecf *hidden, vec_vecf *hidden_z,
@@ -888,8 +885,13 @@ void cpai_accumulate_gradient(neural_network *net, vecf *X, vecf *Y) {
     vecf output;
     vecf_init(&output, outputNeuronCount, 0.0f);
 
-    cpai_calc_output(net, &net->work_hidden, &net->work_hidden_z, &output,
-                     input);
+    if (net->use_avx2) {
+        cpai_calc_output_avx2(net, &net->work_hidden, &net->work_hidden_z,
+                              &output, input);
+    } else {
+        cpai_calc_output(net, &net->work_hidden, &net->work_hidden_z, &output,
+                         input);
+    }
 
     if (net->o_layer.a_type == Softmax) {
         cpai_softmax(&output);
@@ -1184,7 +1186,12 @@ f32 cpai_test_network(neural_network *net) {
         memcpy(inp.data, mat2D_row_ptr(&net->test_data, (u32)i),
                data_cols * sizeof(f32));
 
-        vecf output = cpai_feed_forward(net, &inp);
+        vecf output;
+        if (net->use_avx2) {
+            output = cpai_feed_forward_avx2(net, &inp);
+        } else {
+            output = cpai_feed_forward(net, &inp);
+        }
 
         i32 predicted = 0;
         for (u32 j = 1; j < output.size; j++) {

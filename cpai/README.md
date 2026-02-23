@@ -76,7 +76,7 @@ We train with batches each 64 and 0.05 learn rate. Before we also set momentum t
                                     activation_type oa,
                                     loss_type ol, f32 m,
                                     f32 lrd, f32 lsr,
-                                    b8 ls);`
+                                    b8 ua);`
 > i = input neurons\
 > h = array of hidden neurons (for multiple layers)\
 > o = output neurons\
@@ -86,7 +86,7 @@ We train with batches each 64 and 0.05 learn rate. Before we also set momentum t
 > m = momentum rate\
 > lrd = learn rate decay\
 > lsr = label smooth rate\
-> ls = toggle use of label smoothing
+> ua = toggle use of AVX2 (on modern CPUs for a little faster training if supported)
 
 `void cpai_init_weights(neural_network *net);`
 > initialize weights and biases (with He, Xavier etc. depending on activations)
