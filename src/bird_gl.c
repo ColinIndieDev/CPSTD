@@ -1,11 +1,12 @@
 #define CPL_IMPLEMENTATION
-
 #include "../cplibrary/cpl.h"
 #include "../cpstd/cprng.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
+
+#define SHOW_DETAILS false
 
 // {{{ Start animation
 
@@ -202,21 +203,21 @@ void bg_update(bg *b) {
         f32 right_x = positions_back(&b->sky_positions)->x;
         positions_pop_front(&b->sky_positions);
         positions_push_back(&b->sky_positions,
-                            (vec2f){right_x + (tex_width * 2.0f), 0.0f});
+                            (vec2f){right_x + tex_width, 0.0f});
     }
     if (!positions_empty(&b->building_positions) &&
         positions_front(&b->building_positions)->x + tex_width <= 0) {
         f32 right_x = positions_back(&b->building_positions)->x;
         positions_pop_front(&b->building_positions);
         positions_push_back(&b->building_positions,
-                            (vec2f){right_x + (tex_width * 2.0f), 0.0f});
+                            (vec2f){right_x + tex_width, 0.0f});
     }
     if (!positions_empty(&b->forest_positions) &&
         positions_front(&b->forest_positions)->x + tex_width <= 0) {
         f32 right_x = positions_back(&b->forest_positions)->x;
         positions_pop_front(&b->forest_positions);
         positions_push_back(&b->forest_positions,
-                            (vec2f){right_x + (tex_width * 2.0f), 0.0f});
+                            (vec2f){right_x + tex_width, 0.0f});
     }
 }
 
@@ -328,13 +329,7 @@ void game_update();
 void game_render();
 
 void main_loop() {
-#ifdef __EMSCRIPTEN__
-    i32 w = emscripten_run_script_int("window.innerWidth");
-    i32 h = emscripten_run_script_int("window.innerHeight");
-    if ((f32)w != cpl_screen_width || (f32)h != cpl_screen_height) {
-        glfwSetWindowSize(cpl_window, w, h);
-    }
-#endif
+    cpl_web_window_resize();
     cpl_update();
     if (!fading) {
         handle_input();
@@ -346,6 +341,7 @@ void main_loop() {
 
 int main() {
     cpl_init_window(800, 600, "Flappy Bird Clone");
+    cpl_enable_vsync(false);
     cpl_audio_init();
     game_init();
     start_anim_init();
@@ -535,6 +531,10 @@ void game_render() {
         ui_game_over();
     }
     start_anim_update();
+
+#if SHOW_DETAILS
+    cpl_display_details(&default_font);
+#endif
 
     cpl_begin_draw(CPL_SHAPE_2D_UNLIT, false);
 

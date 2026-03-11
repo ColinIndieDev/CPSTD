@@ -122,14 +122,13 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE #OpenMP::OpenMP_C 
-    Threads::Threads glad freetype miniaudio)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads glad freetype miniaudio)
 
 if (NOT EMSCRIPTEN)
     set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
     set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
 
-    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE glfw)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE glfw OpenMP::OpenMP_C)
 endif()
 
 if (NOT EMSCRIPTEN)

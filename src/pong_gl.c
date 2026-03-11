@@ -1,7 +1,5 @@
 #define CPL_IMPLEMENTATION
-
 #include "../cplibrary/cpl.h"
-#include "../cpstd/cparena.h"
 #include "../cpstd/cprng.h"
 
 #include <stdio.h>
@@ -21,8 +19,7 @@ typedef struct {
 void reset_ball(ball *pong, f32 *speed, f32 start_speed);
 void update(player *p1, player *p2, ball *pong, f32 player_width,
             f32 player_height, f32 off, f32 *ball_speed, f32 ball_speed_start);
-void render(player p1, player p2, ball pong, font *font, texture *tex,
-            mem_arena *arena);
+void render(player p1, player p2, ball pong, font *font, texture *tex);
 
 int main() {
     cpl_init_window(800, 600, "Hello CPL");
@@ -62,18 +59,14 @@ int main() {
     texture logo;
     cpl_load_texture(&logo, "assets/logo.png", CPL_FILTER_LINEAR);
 
-    mem_arena *arena = mem_arena_create(KiB(1));
-
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while (!cpl_window_should_close()) {
         cpl_update();
 
         update(&p1, &p2, &pong, player_width, player_height, off, &ball_speed,
                ball_speed_start);
 
-        render(p1, p2, pong, &default_font, &logo, arena);
+        render(p1, p2, pong, &default_font, &logo);
     }
-    mem_arena_destroy(arena);
     cpl_delete_font(&default_font);
     cpl_unload_texture(&logo);
     cpl_close_window();
@@ -136,8 +129,7 @@ void update(player *p1, player *p2, ball *pong, f32 player_width,
     }
 }
 
-void render(player p1, player p2, ball pong, font *font, texture *tex,
-            mem_arena *arena) {
+void render(player p1, player p2, ball pong, font *font, texture *tex) {
     cpl_clear_background(&BLACK);
 
     cpl_begin_draw(CPL_SHAPE_2D_LIT, false);
@@ -169,7 +161,7 @@ void render(player p1, player p2, ball pong, font *font, texture *tex,
 
     f32 score_font_size = 1.0f;
 
-    char *p1_score = mem_arena_push(arena, 10, true);
+    char p1_score[10];
     snprintf(p1_score, 10, "%d", p1.score);
     vec2f p1_score_text_size =
         cpl_get_text_size(font, p1_score, score_font_size);
@@ -179,7 +171,7 @@ void render(player p1, player p2, ball pong, font *font, texture *tex,
                  cpl_get_screen_height() - p1_score_text_size.y - 10.0f},
         score_font_size, &WHITE);
 
-    char *p2_score = mem_arena_push(arena, 10, true);
+    char p2_score[10];
     snprintf(p2_score, 10, "%d", p2.score);
     vec2f p2_score_text_size =
         cpl_get_text_size(font, p2_score, score_font_size);
@@ -188,8 +180,6 @@ void render(player p1, player p2, ball pong, font *font, texture *tex,
         &(vec2f){(cpl_get_screen_width() * 0.75f) - p2_score_text_size.x,
                  cpl_get_screen_height() - p2_score_text_size.y - 10.0f},
         score_font_size, &WHITE);
-
-    mem_arena_clear(arena);
 
     cpl_display_details(font);
 

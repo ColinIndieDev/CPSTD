@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include <malloc.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,9 +30,7 @@
 #include FT_FREETYPE_H
 #include <miniaudio.h>
 
-#include "../cpstd/cparena.h"
 #include "../cpstd/cpbase.h"
-#include "../cpstd/cphash.h"
 #include "../cpstd/cpmath.h"
 
 // {{{ Key Inputs
@@ -187,8 +186,8 @@
 
 typedef enum { CPL_FILTER_LINEAR, CPL_FILTER_NEAREST } texture_filtering;
 
-typedef enum { LOG_INFO, LOG_WARN, LOG_ERR } log_level;
-void cpl_log(log_level level, char *message);
+typedef enum { LOG_INFO, LOG_WARN, LOG_ERR, LOG_NONE } log_level;
+void cpl_log(log_level level, char *message, ...);
 
 u32 cpl_get_heap_size();
 u32 cpl_get_heap_used();
@@ -454,18 +453,64 @@ void cpl_display_details(font *font);
 
 // {{{ Logging
 
-void cpl_log(log_level level, char *message) {
+void cpl_log(log_level level, char *message, ...) {
+    va_list args;
+    va_start(args, message);
+
     switch (level) {
     case LOG_INFO:
-        printf("[CPL] [INFO]: %s", message);
+        printf("[CPL] [INFO]: ");
         break;
     case LOG_WARN:
-        printf("[CPL] [WARNING]: %s", message);
+        printf("[CPL] [WARNING]: ");
         break;
     case LOG_ERR:
-        fprintf(stderr, "[CPL] [ERROR]: %s", message);
+        fprintf(stderr, "[CPL] [ERROR]: ");
+        break;
+    case LOG_NONE:
         break;
     }
+
+    while ((*message) != '\0') {
+        if ((*message) == '%') {
+            message++;
+            switch ((*message)) {
+            case 'c': {
+                i32 c = va_arg(args, i32);
+                putchar(c);
+                break;
+            }
+            case 'i': {
+                i32 i = va_arg(args, i32);
+                if (i < 0) {
+                    putchar('-');
+                    i = -i;
+                }
+                if (i == 0) {
+                    putchar('0');
+                    break;
+                }
+                if (i / 10) {
+                    cpl_log(LOG_NONE, "%i", i / 10);
+                }
+                putchar((i % 10) + '0');
+                break;
+            }
+            case 's': {
+                char *s = va_arg(args, char *);
+                fputs(s, stdout);
+                break;
+            }
+            default:
+                break;
+            }
+        } else {
+            putchar(*message);
+        }
+        message++;
+    }
+    va_end(args);
+    printf("\n");
 }
 
 // }}}
@@ -534,22 +579,22 @@ u32 cpl_get_stack_used() {
 
 b8 cpl_check_shader_compile_errors(u32 shader, char *type) {
     i32 success = 0;
-    char infoLog[1024];
+    char info_log[1024];
 
     if (strcmp(type, "PROGRAM") == 0) {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            fprintf(stderr, "[CPL] [ERROR] Program linking error:\n%s\n",
-                    infoLog);
+            glGetProgramInfoLog(shader, 1024, NULL, info_log);
+            cpl_log(LOG_ERR, "[CPL] [ERROR] Program linking error:\n%s\n",
+                    info_log);
             return false;
         }
     } else {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
-            glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            fprintf(stderr, "[CPL] [ERROR] Shader compilation error: %s\n%s\n",
-                    type, infoLog);
+            glGetShaderInfoLog(shader, 1024, NULL, info_log);
+            cpl_log(LOG_ERR, "[CPL] [ERROR] Shader compilation error: %s\n%s\n",
+                    type, info_log);
             return false;
         }
     }
@@ -884,9 +929,7 @@ void cpl_create_font(font *f, char *path, char *name,
     }
 
     if (access(path, F_OK) == -1) {
-        char *message = malloc(100);
-        snprintf(message, 100, "Failed to load %s", name);
-        cpl_log(LOG_ERR, message);
+        cpl_log(LOG_ERR, "Failed to load %s", name);
         exit(-1);
     }
 
@@ -1052,7 +1095,7 @@ void cpl_load_texture(texture *t, char *path, texture_filtering filter) {
                      (i32)t->size.y, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
-        cpl_log(LOG_ERR, "Failed to load texture\n");
+        cpl_log(LOG_ERR, "Failed to load texture");
     }
     stbi_image_free(data);
 }
@@ -1187,7 +1230,7 @@ void cpl_audio_play_sound(audio *a) {
         ma_sound **tmp = realloc(cpl_active_sounds,
                                  cpl_active_sounds_cap * sizeof(ma_sound *));
         if (!tmp) {
-            cpl_log(LOG_ERR, "realloc failed!");
+            cpl_log(LOG_ERR, "Realloc sounds failed!");
             return;
         }
         cpl_active_sounds = tmp;
@@ -1279,15 +1322,15 @@ b8 cpl_check_collision_rects(rect_collider *a, rect_collider *b) {
 }
 
 b8 cpl_check_collision_circle_rect(circle_collider *a, rect_collider *b) {
-    vec2f circleCenter = a->pos;
-    vec2f rectCenter =
+    vec2f circle_center = a->pos;
+    vec2f rect_center =
         vec2f_add(&b->pos, &(vec2f){b->size.x * 0.5f, b->size.y * 0.5f});
-    vec2f halfExtents = (vec2f){b->size.x * 0.5f, b->size.y * 0.5f};
-    vec2f difference = vec2f_sub(&circleCenter, &rectCenter);
+    vec2f half_extents = (vec2f){b->size.x * 0.5f, b->size.y * 0.5f};
+    vec2f difference = vec2f_sub(&circle_center, &rect_center);
     vec2f clamped = vec2f_clamp(
-        &difference, &(vec2f){-halfExtents.x, -halfExtents.y}, &halfExtents);
-    vec2f closest = vec2f_add(&rectCenter, &clamped);
-    vec2f delta = vec2f_sub(&closest, &circleCenter);
+        &difference, &(vec2f){-half_extents.x, -half_extents.y}, &half_extents);
+    vec2f closest = vec2f_add(&rect_center, &clamped);
+    vec2f delta = vec2f_sub(&closest, &circle_center);
 
     return vec2f_length(&delta) <= a->radius;
 }
@@ -1320,6 +1363,16 @@ void cpl_framebuffer_size_callback(GLFWwindow *window, i32 width, i32 height) {
     cpl_screen_height = (f32)height;
     mat4f_ortho(&cpl_projection_2D, 0.0f, cpl_screen_width, cpl_screen_height,
                 0.0f, -1.0f, 1.0f);
+}
+
+void cpl_web_window_resize() {
+#ifdef __EMSCRIPTEN__
+    i32 w = emscripten_run_script_int("window.innerWidth");
+    i32 h = emscripten_run_script_int("window.innerHeight");
+    if ((f32)w != cpl_screen_width || (f32)h != cpl_screen_height) {
+        glfwSetWindowSize(cpl_window, w, h);
+    }
+#endif
 }
 
 void cpl_init_shaders() {
@@ -1373,7 +1426,7 @@ void cpl_init_window(i32 width, i32 height, char *title) {
 
     cpl_window = glfwCreateWindow(width, height, title, NULL, NULL);
     if (cpl_window == NULL) {
-        fprintf(stderr, "[CPL] [ERROR] Failed to create window\n");
+        cpl_log(LOG_ERR, "[CPL] [ERROR] Failed to create window");
         glfwTerminate();
         exit(-1);
     }
@@ -1382,7 +1435,7 @@ void cpl_init_window(i32 width, i32 height, char *title) {
     glfwSetFramebufferSizeCallback(cpl_window, cpl_framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)(glfwGetProcAddress))) {
-        fprintf(stderr, "[CPL] [ERROR] Failed to initialize GLAD");
+        cpl_log(LOG_ERR, "[CPL] [ERROR] Failed to initialize GLAD");
         exit(-1);
     }
 
@@ -1516,26 +1569,21 @@ void cpl_add_point_lights_2D(point_light_2D *ls, u32 size) {
     cpl_use_shader(ss);
 
     cpl_shader_set_i32(ss, "point_lights_cnt", (i32)size);
-
-    mem_arena *arena = mem_arena_create(KiB(1));
     for (u32 i = 0; i < size; i++) {
-        char *pos = mem_arena_push(arena, 50, true);
+        char pos[50];
         snprintf(pos, 50, "point_lights[%d].pos", i);
-        char *radius = mem_arena_push(arena, 50, true);
+        char radius[50];
         snprintf(radius, 50, "point_lights[%d].r", i);
-        char *intensity = mem_arena_push(arena, 50, true);
+        char intensity[50];
         snprintf(intensity, 50, "point_lights[%d].intensity", i);
-        char *color = mem_arena_push(arena, 50, true);
+        char color[50];
         snprintf(color, 50, "point_lights[%d].color", i);
 
         cpl_shader_set_vec2f(ss, pos, &ls[i].pos);
         cpl_shader_set_f32(ss, radius, ls[i].radius);
         cpl_shader_set_f32(ss, intensity, ls[i].intensity);
         cpl_shader_set_rgba(ss, color, &ls[i].color);
-
-        mem_arena_clear(arena);
     }
-    mem_arena_destroy(arena);
 
     // TODO add for texture 2D extra version if texture_lit exists
 
@@ -1642,46 +1690,37 @@ void cpl_end_frame() {
 void cpl_display_details(font *font) {
     cpl_begin_draw(CPL_TEXT, false);
 
-    mem_arena *arena = mem_arena_create(KiB(1));
+    char version_str[50];
+    char renderer_str[50];
+    char vendor_str[50];
+    char fps[15];
+    char stack_used[50];
+    char heap_total[50];
+    char heap_used[50];
+    char heap_free[50];
 
-    char *version_str = mem_arena_push(arena, 50, true);
     snprintf(version_str, 50, "OpenGL version: %s", cpl_version);
-    cpl_draw_text(font, version_str, &(vec2f){10.0f, 10.0f}, 0.5f, &WHITE);
-
-    char *renderer_str = mem_arena_push(arena, 50, true);
     snprintf(renderer_str, 50, "Renderer: %s", cpl_renderer);
-    cpl_draw_text(font, renderer_str, &(vec2f){10.0f, 40.0f}, 0.5f, &WHITE);
-
-    char *vendor_str = mem_arena_push(arena, 50, true);
     snprintf(vendor_str, 50, "Vendor: %s", cpl_vendor);
-    cpl_draw_text(font, vendor_str, &(vec2f){10.0f, 70.0f}, 0.5f, &WHITE);
-
-    char *fps = mem_arena_push(arena, 15, true);
     snprintf(fps, 15, "FPS: %d", cpl_get_fps());
-    cpl_draw_text(font, fps, &(vec2f){10.0f, 100.0f}, 0.5f, &WHITE);
-
-    char *stack_used = mem_arena_push(arena, 50, true);
     snprintf(stack_used, 50, "Stack used: %.3f / %.3f MB (%f%%)",
              MB((f32)cpl_get_stack_used()), MB((f32)cpl_get_stack_size()),
              (f32)cpl_get_stack_used() / (f32)cpl_get_stack_size());
-    cpl_draw_text(font, stack_used, &(vec2f){10.0f, 130.0f}, 0.5f, &WHITE);
-
-    char *heap_total = mem_arena_push(arena, 50, true);
     snprintf(heap_total, 50, "Heap size: %d MB",
              (i32)MB((f32)cpl_get_heap_size()));
-    cpl_draw_text(font, heap_total, &(vec2f){10.0f, 160.0f}, 0.5f, &WHITE);
-
-    char *heap_used = mem_arena_push(arena, 50, true);
     snprintf(heap_used, 50, "Heap used: %d MB",
              (i32)MB((f32)cpl_get_heap_used()));
-    cpl_draw_text(font, heap_used, &(vec2f){10.0f, 190.0f}, 0.5f, &WHITE);
-
-    char *heap_free = mem_arena_push(arena, 50, true);
     snprintf(heap_free, 50, "Heap free: %d MB",
              (i32)MB((f32)cpl_get_heap_free()));
-    cpl_draw_text(font, heap_free, &(vec2f){10.0f, 220.0f}, 0.5f, &WHITE);
 
-    mem_arena_destroy(arena);
+    cpl_draw_text(font, version_str, &(vec2f){10.0f, 10.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, renderer_str, &(vec2f){10.0f, 40.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, vendor_str, &(vec2f){10.0f, 70.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, fps, &(vec2f){10.0f, 100.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, stack_used, &(vec2f){10.0f, 130.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, heap_total, &(vec2f){10.0f, 160.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, heap_used, &(vec2f){10.0f, 190.0f}, 0.5f, &WHITE);
+    cpl_draw_text(font, heap_free, &(vec2f){10.0f, 220.0f}, 0.5f, &WHITE);
 }
 
 // }}}

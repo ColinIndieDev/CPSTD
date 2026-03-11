@@ -38,10 +38,7 @@
         if (vec->size >= vec->capacity) {                                      \
             vec->capacity *= 2;                                                \
             type *temp = realloc(vec->data, vec->capacity * sizeof(type));     \
-            if (!(b8)temp) {                                                   \
-                fprintf(stderr, "[CPVEC] [ERROR]: realloc failed\n");          \
-                return;                                                        \
-            }                                                                  \
+            assert(temp != NULL);                                              \
             vec->data = temp;                                                  \
         }                                                                      \
         vec->data[vec->size] = val;                                            \
