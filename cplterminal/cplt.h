@@ -9,12 +9,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "../cpstd/cpbase.h"
+#include "../cpstd/cpmemory.h"
 
 i32 width = 0;
 i32 height = 0;
@@ -133,10 +135,10 @@ void cplt_init(i32 w, i32 h) {
     width = (w > 0 && w <= ws.ws_col) ? w : ws.ws_col;
     height = (h > 0 && h <= ws.ws_row) ? h : ws.ws_row;
 
-    screen_buf = malloc((u64)width * height);
-    col_buf = malloc((u64)width * height * sizeof(i32));
-    memset(screen_buf, ' ', (u64)width * height);
-    memset(col_buf, 0, (u64)width * height * sizeof(i32));
+    screen_buf = cp_malloc((u64)width * height);
+    col_buf = cp_malloc((u64)width * height * sizeof(i32));
+    cp_memset(screen_buf, ' ', (u64)width * height);
+    cp_memset(col_buf, 0, (u64)width * height * sizeof(i32));
 
     write(STDOUT_FILENO, "\x1b[?1049h", 8);
     write(STDOUT_FILENO, "\x1b[2J", 4);
@@ -173,7 +175,7 @@ u32 cplt_get_stack_size() {
 u32 cplt_get_stack_used() {
     pthread_attr_t attr;
     pthread_getattr_np(pthread_self(), &attr);
-    void *base = NULL;
+    void *base = NULLPTR;
     size_t size = 0;
     pthread_attr_getstack(&attr, &base, &size);
     pthread_attr_destroy(&attr);
@@ -218,8 +220,8 @@ b8 cplt_check_collision_rects(rect *a, rect *b) {
 void cplt_update_input() {
     f32 now = cplt_get_time();
 
-    memset(keyPressed, false, sizeof(keyPressed));
-    memset(keyReleased, false, sizeof(keyReleased));
+    cp_memset(keyPressed, false, sizeof(keyPressed));
+    cp_memset(keyReleased, false, sizeof(keyReleased));
 
     i8 buf[64];
     i32 n;
@@ -262,15 +264,15 @@ void cplt_render() {
     }
 
     i32 lineBufSize = (width * 22) + 64;
-    i8 *line = malloc((size_t)lineBufSize);
+    i8 *line = cp_malloc((size_t)lineBufSize);
     if (!line) {
         return;
     }
 
     i32 totalSize = ((lineBufSize + 8) * height) + 64;
-    i8 *out = malloc((size_t)totalSize);
+    i8 *out = cp_malloc((size_t)totalSize);
     if (!out) {
-        free(line);
+        cp_free(line);
         return;
     }
     i32 outPos = 0;
@@ -311,13 +313,13 @@ void cplt_render() {
             line[pos++] = '\n';
         }
 
-        memcpy(out + outPos, line, (size_t)pos);
+        cp_memcpy(out + outPos, line, (size_t)pos);
         outPos += pos;
     }
 
     write(STDOUT_FILENO, out, (size_t)outPos);
-    free(line);
-    free(out);
+    cp_free(line);
+    cp_free(out);
 
     if (frame_sync) {
         write(STDOUT_FILENO, "\x1b[?2026l", 8);

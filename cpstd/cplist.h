@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assert.h>
+
 #include "cpbase.h"
 #include "cpmemory.h"
 
@@ -15,7 +17,8 @@
         u32 size;                                                              \
     } name;                                                                    \
     void name##_init(name *l, u32 size) {                                      \
-        l->capacity = size * 2;                                                \
+        assert(l != NULLPTR);                                                  \
+        l->capacity = size < 0 ? 10 : size * 2;                                \
         l->nodes = cp_malloc(l->capacity * sizeof(name##_node));               \
         l->size = size;                                                        \
         for (u32 i = 0; i < size; i++) {                                       \
@@ -27,16 +30,20 @@
         }                                                                      \
     }                                                                          \
     void name##_destroy(name *l) {                                             \
+        assert(l != NULLPTR);                                                  \
         cp_free(l->nodes);                                                     \
         l->capacity = 0;                                                       \
         l->size = 0;                                                           \
     }                                                                          \
     void name##_reserve(name *l, u32 capacity) {                               \
+        assert(l != NULLPTR);                                                  \
+        assert(capacity > 0);                                                  \
         l->nodes = cp_malloc(capacity * sizeof(name##_node));                  \
         l->capacity = capacity;                                                \
         l->size = 0;                                                           \
     }                                                                          \
     void name##_add(name *l, type val) {                                       \
+        assert(l != NULLPTR);                                                  \
         if (l->capacity <= l->size) {                                          \
             name##_node *new_data = cp_realloc(                                \
                 l->nodes, (u64)l->capacity * 2 * sizeof(name##_node));         \
@@ -50,21 +57,27 @@
         }                                                                      \
         l->nodes[l->size++] = (name##_node){val, false, NULL};                 \
     }                                                                          \
-    name##_node *name##_get(name *l, u32 i) { return &l->nodes[i]; }           \
-    void name##_set(name *l, u32 i, type val) { l->nodes[i].val = val; }       \
+    name##_node *name##_get(name *l, u32 i) {                                  \
+        assert(l != NULLPTR);                                                  \
+        assert(i >= 0 && i < l->size);                                         \
+        return &l->nodes[i];                                                   \
+    }                                                                          \
+    void name##_set(name *l, u32 i, type val) {                                \
+        assert(l != NULLPTR);                                                  \
+        assert(i >= 0 && i < l->size);                                         \
+        l->nodes[i].val = val;                                                 \
+    }                                                                          \
     void name##_pop(name *l, u32 i) {                                          \
-        if (i >= l->size) {                                                    \
-            return;                                                            \
-        }                                                                      \
+        assert(l != NULLPTR);                                                  \
+        assert(i >= 0 && i < l->size);                                         \
         l->nodes[i].tomb = true;                                               \
-        if (i == 0) {                                                          \
+        i32 prev = (i32)i - 1;                                                 \
+        while (prev >= 0 && l->nodes[prev].tomb) {                             \
+            prev--;                                                            \
+        }                                                                      \
+        if (prev < 0) {                                                        \
             return;                                                            \
         }                                                                      \
-        i32 prev = (i32)i - 1;                                                 \
-        while (prev >= 0 && l->nodes[prev].tomb)                               \
-            prev--;                                                            \
-        if (prev < 0)                                                          \
-            return;                                                            \
         u32 next = i + 1;                                                      \
         while (next < l->size && l->nodes[next].tomb) {                        \
             next++;                                                            \

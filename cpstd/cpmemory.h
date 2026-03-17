@@ -61,7 +61,18 @@ void *cp_memmove(void *dest, const void *src, u32 size) {
     return dest;
 }
 
-// TODO add cp_memcmp
+int cp_memcmp(const void *ptr1, const void *ptr2, u32 size) {
+    const u8 *a = (const u8 *)ptr1;
+    const u8 *b = (const u8 *)ptr2;
+    while (size--) {
+        if (*a != *b) {
+            return *a - *b;
+        }
+        a++;
+        b++;
+    }
+    return 0;
+}
 
 void *cp_malloc(u32 size) {
     block_meta *block;
@@ -119,7 +130,7 @@ void cp_free(void *ptr) {
 }
 
 void *cp_calloc(u32 num, u32 size) {
-    if (num != 0 && size > CPM_U32_MAX / num) {
+    if (num != 0 && size > U32_MAX / num) {
         return NULLPTR;
     }
     u32 total = num * size;
@@ -127,7 +138,7 @@ void *cp_calloc(u32 num, u32 size) {
     if (!ptr) {
         return NULLPTR;
     }
-    memset(ptr, 0, total);
+    cp_memset(ptr, 0, total);
     return ptr;
 }
 
@@ -147,7 +158,7 @@ void *cp_realloc(void *ptr, u32 size) {
     if (!new_ptr) {
         return NULLPTR;
     }
-    memcpy(new_ptr, ptr, block->size);
+    cp_memcpy(new_ptr, ptr, block->size);
     cp_free(ptr);
 
     return new_ptr;

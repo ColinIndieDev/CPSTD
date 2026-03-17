@@ -34,7 +34,7 @@ int main() {
     i32 borderBegin = 5;
     i32 borderEnd = height - 1 - 5;
 
-    bool start = false;
+    b8 start = false;
 
     while (running) {
         cplt_calc_fps();

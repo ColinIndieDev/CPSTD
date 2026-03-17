@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assert.h>
+
 #include "cpbase.h"
 #include "cpmemory.h"
 
@@ -12,6 +14,8 @@
         u32 tail;                                                              \
     } name;                                                                    \
     void name##_init(name *q, u32 capacity) {                                  \
+        assert(q != NULLPTR);                                                  \
+        assert(capacity > 0);                                                  \
         q->data = cp_malloc(capacity * sizeof(type));                          \
         q->capacity = capacity;                                                \
         q->size = 0;                                                           \
@@ -19,6 +23,7 @@
         q->tail = 0;                                                           \
     }                                                                          \
     void name##_destroy(name *q) {                                             \
+        assert(q != NULLPTR);                                                  \
         cp_free(q->data);                                                      \
         q->capacity = 0;                                                       \
         q->size = 0;                                                           \
@@ -26,6 +31,7 @@
         q->tail = 0;                                                           \
     }                                                                          \
     void name##_resize(name *q) {                                              \
+        assert(q != NULLPTR);                                                  \
         u32 new_capacity = q->capacity * 2;                                    \
         type *new_data = cp_malloc(new_capacity * sizeof(type));               \
         for (u32 i = 0; i < q->size; i++) {                                    \
@@ -38,6 +44,7 @@
         q->head = q->size;                                                     \
     }                                                                          \
     void name##_push(name *q, type val) {                                      \
+        assert(q != NULLPTR);                                                  \
         if (q->size >= q->capacity) {                                          \
             name##_resize(q);                                                  \
         }                                                                      \
@@ -46,27 +53,27 @@
         q->size++;                                                             \
     }                                                                          \
     void name##_pop(name *q, type *data) {                                     \
-        if (q->size <= 0) {                                                    \
-            return;                                                            \
-        }                                                                      \
+        assert(q != NULLPTR);                                                  \
+        assert(q->size > 0);                                                   \
         *data = q->data[q->tail];                                              \
         q->tail = (q->tail + 1) % q->capacity;                                 \
         q->size--;                                                             \
     }                                                                          \
     type *name##_front(name *q) {                                              \
-        if (q->size == 0) {                                                    \
-            return NULL;                                                       \
-        }                                                                      \
+        assert(q != NULLPTR);                                                  \
+        assert(q->size != 0);                                                  \
         u32 idx = q->head == 0 ? q->capacity - 1 : q->head - 1;                \
         return &q->data[idx];                                                  \
     }                                                                          \
     type *name##_back(name *q) {                                               \
-        if (q->size == 0) {                                                    \
-            return NULL;                                                       \
-        }                                                                      \
+        assert(q != NULLPTR);                                                  \
+        assert(q->size != 0);                                                  \
         return &q->data[q->tail];                                              \
     }                                                                          \
-    b8 name##_empty(name *q) { return q->size <= 0; }
+    b8 name##_empty(name *q) {                                                 \
+        assert(q != NULLPTR);                                                  \
+        return q->size <= 0;                                                   \
+    }
 
 #define PRIORITY_QUEUE_DEF(type, name)                                         \
     typedef struct {                                                           \
@@ -79,16 +86,20 @@
         u32 capacity;                                                          \
     } name;                                                                    \
     void name##_init(name *q, u32 capacity) {                                  \
+        assert(q != NULLPTR);                                                  \
+        assert(capacity > 0);                                                  \
         q->data = cp_malloc(capacity * sizeof(name##_node));                   \
         q->capacity = capacity;                                                \
         q->size = 0;                                                           \
     }                                                                          \
     void name##_destroy(name *q) {                                             \
+        assert(q != NULLPTR);                                                  \
         cp_free(q->data);                                                      \
         q->size = 0;                                                           \
         q->capacity = 0;                                                       \
     }                                                                          \
     void name##_heapify_up(name *q, u32 i) {                                   \
+        assert(q != NULLPTR);                                                  \
         while (i > 0) {                                                        \
             u32 parent = (i - 1) / 2;                                          \
             if (q->data[parent].priority >= q->data[i].priority) {             \
@@ -101,6 +112,7 @@
         }                                                                      \
     }                                                                          \
     void name##_heapify_down(name *q, u32 i) {                                 \
+        assert(q != NULLPTR);                                                  \
         while (true) {                                                         \
             u32 left = (2 * i) + 1;                                            \
             u32 right = (2 * i) + 2;                                           \
@@ -123,6 +135,7 @@
         }                                                                      \
     }                                                                          \
     void name##_push(name *q, type val, f32 priority) {                        \
+        assert(q != NULLPTR);                                                  \
         if (q->size >= q->capacity) {                                          \
             name##_node *new_data = cp_realloc(                                \
                 q->data, (u64)q->capacity * 2 * sizeof(name##_node));          \
@@ -136,12 +149,14 @@
         q->size++;                                                             \
     }                                                                          \
     void name##_pop(name *q, type *val) {                                      \
-        if (q->size <= 0) {                                                    \
-            return;                                                            \
-        }                                                                      \
+        assert(q != NULLPTR);                                                  \
+        assert(q->size > 0);                                                   \
         *val = q->data[0].val;                                                 \
         q->size--;                                                             \
         q->data[0] = q->data[q->size];                                         \
         name##_heapify_down(q, 0);                                             \
     }                                                                          \
-    b8 name##_empty(name *q) { return q->size <= 0; }
+    b8 name##_empty(name *q) {                                                 \
+        assert(q != NULLPTR);                                                  \
+        return q->size <= 0;                                                   \
+    }

@@ -449,7 +449,6 @@ void cpl_display_details(font *font);
 
 // }}}
 
-#define CPL_IMPLEMENTATION
 #ifdef CPL_IMPLEMENTATION
 
 // {{{ Logging

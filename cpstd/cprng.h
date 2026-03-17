@@ -1,9 +1,9 @@
 #pragma once
 
+#include <time.h>
+
 #include "cpbase.h"
 #include "cpmath.h"
-
-#include <time.h>
 
 typedef struct {
     u64 state;
@@ -37,7 +37,7 @@ void cprng_rand_seedr(cprng_state *rng) {
 void cprng_rand_seed() { cprng_rand_seedr(&rng_state); }
 
 f32 cprng_randfr(cprng_state *rng) {
-    return (f32)cprng_randr(rng) / (f32)CPM_U32_MAX;
+    return (f32)cprng_randr(rng) / (f32)U32_MAX;
 }
 
 void cprng_seedr(cprng_state *rng, u64 state, u64 seq) {

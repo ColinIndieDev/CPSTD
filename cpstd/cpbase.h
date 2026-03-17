@@ -19,17 +19,17 @@ typedef _Bool b8;
 
 #define NULLPTR ((void *)0)
 
-#define CPM_U8_MAX 255
-#define CPM_I8_MAX 127
-#define CPM_U16_MAX 65535
-#define CPM_I16_MAX 32767
-#define CPM_U32_MAX 4294967295
-#define CPM_I32_MAX 2147483647
-#define CPM_U64_MAX 18446744073709551615
-#define CPM_I64_MAX 9223372036854775807
+#define U8_MAX 255
+#define I8_MAX 127
+#define U16_MAX 65535
+#define I16_MAX 32767
+#define U32_MAX 4294967295
+#define I32_MAX 2147483647
+#define U64_MAX 18446744073709551615
+#define I64_MAX 9223372036854775807
 
-#define CPM_F32_MAX 3.402823466e+38f
-#define CPM_F64_MAX 1.79769e+308
+#define F32_MAX 3.402823466e+38f
+#define F64_MAX 1.79769e+308
 
 #define Bit(n) ((n) / 8.0f)
 #define KB(n) ((n) / 1000.0f)

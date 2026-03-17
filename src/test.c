@@ -3,18 +3,26 @@
 #include "../cpstd/cplist.h"
 #include "../cpstd/cpmemory.h"
 #include "../cpstd/cpqueue.h"
+#include "../cpstd/cparr.h"
+#include "../cpstd/cpsort.h"
+
+#include "../cpstd/cprng.h"
 
 #include <stdio.h>
+#include <time.h>
 
+ARR_DEF(f32, arr_f32)
 VEC_DEF(i32, vec_i32)
 HASHMAP_DEF(u8, f32, map)
 HASHSET_DEF(u8, set)
 QUEUE_DEF(i32, queue)
 PRIORITY_QUEUE_DEF(i32, priority_queue)
-LINKED_LIST_DEF(const char *, ll_str)
+LINKED_LIST_DEF(const i8 *, ll_str)
+
+SORT_ALGORITHM_DEF(i32, integers)
 
 int main() {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 5; i++) {
         int *val = cp_malloc(sizeof(int));
 
         *val = 1092;
@@ -140,4 +148,21 @@ int main() {
     vec_i32_copy(&v1, &v2);
 
     FOREACH_VEC(int, vec_i32, it, &v2) { printf("%d", *it); }
+
+    cprng_rand_seed();
+
+    vec_i32 v;
+
+    vec_i32_reserve(&v, 1000);
+    for (u32 i = 0; i < 1000; i++) {
+        vec_i32_push_back(&v, cprng_rand_range(0, 100000));
+    }
+
+    clock_t start = clock();
+    integers_sort(v.data, (i32)v.size);
+
+    f64 elapsed = (f64)(clock() - start) / CLOCKS_PER_SEC;
+
+    printf("\nTook %.1fms!\n", elapsed * 1000000);
+    FOREACH_VEC(i32, vec_i32, it, &v) { printf("%d ", *it); }
 }

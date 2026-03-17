@@ -1,8 +1,10 @@
 #pragma once
 
+#include <assert.h>
+
 #include "cpbase.h"
-#include "cpmemory.h"
 #include "cpmath.h"
+#include "cpmemory.h"
 
 typedef struct {
     u64 capacity;
@@ -14,6 +16,7 @@ typedef struct {
 #define ARENA_ALIGN (sizeof(void *))
 
 mem_arena *mem_arena_create(u64 capacity) {
+    assert(capacity > 0);
     mem_arena *arena = cp_malloc(capacity);
     arena->capacity = capacity;
     arena->pos = ARENA_BASE_POS;
@@ -33,7 +36,7 @@ void *mem_arena_push(mem_arena *arena, u64 size, b8 zero) {
     u8 *out = (u8 *)arena + pos_aligned;
 
     if (zero) {
-        memset(out, 0, size);
+        cp_memset(out, 0, size);
     }
 
     return out;

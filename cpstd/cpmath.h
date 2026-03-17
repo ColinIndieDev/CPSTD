@@ -27,7 +27,7 @@ f32 cpm_factorial(i32 n) {
 
 f32 cpm_expf(f32 x) {
     if (x > 88.0f) {
-        return CPM_F32_MAX;
+        return F32_MAX;
     }
     if (x < -88.0f) {
         return 0.0f;
@@ -43,7 +43,7 @@ f32 cpm_expf(f32 x) {
 
     i32 bits = (k + 127) << 23;
     f32 pow2k;
-    memcpy(&pow2k, &bits, sizeof(f32));
+    cp_memcpy(&pow2k, &bits, sizeof(f32));
 
     return result * pow2k;
 }
@@ -126,7 +126,7 @@ f32 cpm_sqrt(f32 n) {
 
 f32 cpm_logf(f32 x) {
     if (x <= 0) {
-        return -CPM_F32_MAX;
+        return -F32_MAX;
     }
     f32 y = x - 1.0f;
     for (i32 i = 0; i < 100; i++) {
@@ -192,7 +192,7 @@ f32 *mat2D_row_ptr(mat2D *m, u32 row) {
 void mat2D_get_row(mat2D *m, u32 row, f32 *out) {
     assert(row < m->rows);
 
-    memcpy(out, &m->data.data[(u64)row * m->cols], m->cols * sizeof(f32));
+    cp_memcpy(out, &m->data.data[(u64)row * m->cols], m->cols * sizeof(f32));
 }
 
 u32 mat2D_size(mat2D *m) { return m->data.size; }
