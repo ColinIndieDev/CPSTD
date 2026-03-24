@@ -45,7 +45,7 @@ typedef _Bool b8;
 #define PROG_SUCCESS 0
 #define PROG_FAIL (-1)
 
-#define EXIT(s) _exit(s)
+#define EXIT(s) cexit(s)
 void cexit(i32 status) {
     fflush(stdout);
     fflush(stderr);
