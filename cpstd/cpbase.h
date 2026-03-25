@@ -3,14 +3,14 @@
 #include <stdio.h>
 
 typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long long int u64;
+typedef unsigned __INT16_TYPE__ u16;
+typedef unsigned __INT32_TYPE__ u32;
+typedef unsigned __INT64_TYPE__ u64;
 
 typedef char i8;
-typedef short i16;
-typedef int i32;
-typedef long long int i64;
+typedef __INT16_TYPE__ i16;
+typedef __INT32_TYPE__ i32;
+typedef __INT64_TYPE__ i64;
 
 typedef float f32;
 typedef double f64;
@@ -49,12 +49,10 @@ typedef _Bool b8;
 void cexit(i32 status) {
     fflush(stdout);
     fflush(stderr);
-    asm volatile (
-        "movl %0, %%edi\n"
-        "movl $60, %%eax\n"
-        "syscall"
-        :
-        : "r"(status)
-        : "%eax", "%edi"
-    );   
+    asm volatile("movl %0, %%edi\n"
+                 "movl $60, %%eax\n"
+                 "syscall"
+                 :
+                 : "r"(status)
+                 : "%eax", "%edi");
 }
