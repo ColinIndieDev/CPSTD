@@ -463,6 +463,13 @@ void cpl_set_ambient_light_2D(f32 strength);
 void cpl_set_global_light_2D(global_light_2D *l);
 void cpl_add_point_lights_2D(point_light_2D *ls, u32 size);
 
+void cpl_begin_shadow_cast_2D();
+void cpl_end_shadow_cast_2D(f32 ambient, f32 shadow_strength,
+                            color shadow_color);
+void cpl_draw_triangle_shadow(vec2f a, vec2f b, vec2f c);
+void cpl_draw_rect_shadow(vec2f pos, vec2f size, point_light_2D *lights, u32 n,
+                          f32 far);
+
 void cpl_update_input();
 b8 cpl_is_key_down(i32 key);
 b8 cpl_is_key_up(i32 key);
@@ -472,7 +479,7 @@ b8 cpl_is_mouse_down(i32 button);
 b8 cpl_is_mouse_pressed(i32 button);
 b8 cpl_is_mouse_released(i32 button);
 vec2f cpl_get_mouse_pos();
-b8 cpl_is_key_down_old(i32 key);
+cam_2D *cpl_get_cam_2D();
 
 void cpl_calc_fps();
 i32 cpl_get_fps();
@@ -492,6 +499,7 @@ void cpl_display_details(font *font);
 
 // }}}
 
+#define CPL_IMPLEMENTATION
 #ifdef CPL_IMPLEMENTATION
 
 // {{{ Logging
@@ -1719,6 +1727,14 @@ void cpl_tilemap_draw(tilemap *m, shader *s) {
 
 // }}}
 
+// {{{ Particle System
+
+typedef struct {
+
+} particle;
+
+// }}}
+
 // {{{ General
 
 mat4f *cpl_cam_2D_get_view_mat(cam_2D *cam) {
@@ -2163,6 +2179,9 @@ b8 cpl_is_mouse_released(i32 button) {
     return !mouse_button_states[button - CPL_MOUSE_BUTTON_1] &&
            prev_mouse_button_states[button - CPL_MOUSE_BUTTON_1];
 }
+
+cam_2D *cpl_get_cam_2D() { return &cpl_cam_2D; }
+
 vec2f cpl_get_mouse_pos() {
     f64 x = 0;
     f64 y = 0;

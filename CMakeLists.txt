@@ -117,7 +117,7 @@ endforeach()
 message(STATUS "============================================")
 
 add_executable(${CMAKE_PROJECT_NAME}
-    src/qr_code_v2.c
+    src/qr_code.c
     ${SOURCE_FILES}
 )
 

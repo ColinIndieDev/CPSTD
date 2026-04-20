@@ -1,9 +1,26 @@
 #define CPL_IMPLEMENTATION
 #include "../cplibrary/cpl.h"
 
-#define SIZE 25
+#define VERSION 3
+#define SIZE (17 + (4 * VERSION))
 
-#define PIXEL_SIZE 35
+#if VERSION == 4
+#define DATA_BYTES 64
+#define EC_BYTES 36
+#define TOTAL_CW (DATA_BYTES + EC_BYTES)
+#elif VERSION == 2
+#define DATA_BYTES 28
+#define EC_BYTES 16
+#define TOTAL_CW (DATA_BYTES + EC_BYTES)
+#elif VERSION == 3
+#define DATA_BYTES 44
+#define EC_BYTES 26
+#define TOTAL_CW (DATA_BYTES + EC_BYTES)
+#endif
+
+#define QUIET 2
+
+u32 pixel_size = 25;
 
 typedef enum {
     DATA_FORMAT_NUMERIC = 0b0001,
@@ -22,9 +39,9 @@ typedef enum {
     MASK_7,
 } mask;
 
-u32 qr_code[SIZE][SIZE];
+u32 qr_code[SIZE][SIZE] = {0};
 
-// {{{ Fixed patterns
+// {{{ Fixed pattern
 
 void write_position_detection_patterns() {
     qr_code[0][0] = 1;
@@ -61,107 +78,95 @@ void write_position_detection_patterns() {
     qr_code[4][3] = 1;
     qr_code[4][4] = 1;
 
-    qr_code[18 + 0][0] = 1;
-    qr_code[18 + 0][1] = 1;
-    qr_code[18 + 0][2] = 1;
-    qr_code[18 + 0][3] = 1;
-    qr_code[18 + 0][4] = 1;
-    qr_code[18 + 0][5] = 1;
-    qr_code[18 + 0][6] = 1;
-    qr_code[18 + 1][0] = 1;
-    qr_code[18 + 2][0] = 1;
-    qr_code[18 + 3][0] = 1;
-    qr_code[18 + 4][0] = 1;
-    qr_code[18 + 5][0] = 1;
-    qr_code[18 + 6][0] = 1;
-    qr_code[18 + 6][1] = 1;
-    qr_code[18 + 6][2] = 1;
-    qr_code[18 + 6][3] = 1;
-    qr_code[18 + 6][4] = 1;
-    qr_code[18 + 6][5] = 1;
-    qr_code[18 + 6][6] = 1;
-    qr_code[18 + 1][6] = 1;
-    qr_code[18 + 2][6] = 1;
-    qr_code[18 + 3][6] = 1;
-    qr_code[18 + 4][6] = 1;
-    qr_code[18 + 5][6] = 1;
-    qr_code[18 + 2][2] = 1;
-    qr_code[18 + 2][3] = 1;
-    qr_code[18 + 2][4] = 1;
-    qr_code[18 + 3][2] = 1;
-    qr_code[18 + 3][3] = 1;
-    qr_code[18 + 3][4] = 1;
-    qr_code[18 + 4][2] = 1;
-    qr_code[18 + 4][3] = 1;
-    qr_code[18 + 4][4] = 1;
+    qr_code[(SIZE - 7) + 0][0] = 1;
+    qr_code[(SIZE - 7) + 0][1] = 1;
+    qr_code[(SIZE - 7) + 0][2] = 1;
+    qr_code[(SIZE - 7) + 0][3] = 1;
+    qr_code[(SIZE - 7) + 0][4] = 1;
+    qr_code[(SIZE - 7) + 0][5] = 1;
+    qr_code[(SIZE - 7) + 0][6] = 1;
+    qr_code[(SIZE - 7) + 1][0] = 1;
+    qr_code[(SIZE - 7) + 2][0] = 1;
+    qr_code[(SIZE - 7) + 3][0] = 1;
+    qr_code[(SIZE - 7) + 4][0] = 1;
+    qr_code[(SIZE - 7) + 5][0] = 1;
+    qr_code[(SIZE - 7) + 6][0] = 1;
+    qr_code[(SIZE - 7) + 6][1] = 1;
+    qr_code[(SIZE - 7) + 6][2] = 1;
+    qr_code[(SIZE - 7) + 6][3] = 1;
+    qr_code[(SIZE - 7) + 6][4] = 1;
+    qr_code[(SIZE - 7) + 6][5] = 1;
+    qr_code[(SIZE - 7) + 6][6] = 1;
+    qr_code[(SIZE - 7) + 1][6] = 1;
+    qr_code[(SIZE - 7) + 2][6] = 1;
+    qr_code[(SIZE - 7) + 3][6] = 1;
+    qr_code[(SIZE - 7) + 4][6] = 1;
+    qr_code[(SIZE - 7) + 5][6] = 1;
+    qr_code[(SIZE - 7) + 2][2] = 1;
+    qr_code[(SIZE - 7) + 2][3] = 1;
+    qr_code[(SIZE - 7) + 2][4] = 1;
+    qr_code[(SIZE - 7) + 3][2] = 1;
+    qr_code[(SIZE - 7) + 3][3] = 1;
+    qr_code[(SIZE - 7) + 3][4] = 1;
+    qr_code[(SIZE - 7) + 4][2] = 1;
+    qr_code[(SIZE - 7) + 4][3] = 1;
+    qr_code[(SIZE - 7) + 4][4] = 1;
 
-    qr_code[0][18 + 0] = 1;
-    qr_code[0][18 + 1] = 1;
-    qr_code[0][18 + 2] = 1;
-    qr_code[0][18 + 3] = 1;
-    qr_code[0][18 + 4] = 1;
-    qr_code[0][18 + 5] = 1;
-    qr_code[0][18 + 6] = 1;
-    qr_code[1][18 + 0] = 1;
-    qr_code[2][18 + 0] = 1;
-    qr_code[3][18 + 0] = 1;
-    qr_code[4][18 + 0] = 1;
-    qr_code[5][18 + 0] = 1;
-    qr_code[6][18 + 0] = 1;
-    qr_code[6][18 + 1] = 1;
-    qr_code[6][18 + 2] = 1;
-    qr_code[6][18 + 3] = 1;
-    qr_code[6][18 + 4] = 1;
-    qr_code[6][18 + 5] = 1;
-    qr_code[6][18 + 6] = 1;
-    qr_code[1][18 + 6] = 1;
-    qr_code[2][18 + 6] = 1;
-    qr_code[3][18 + 6] = 1;
-    qr_code[4][18 + 6] = 1;
-    qr_code[5][18 + 6] = 1;
-    qr_code[2][18 + 2] = 1;
-    qr_code[2][18 + 3] = 1;
-    qr_code[2][18 + 4] = 1;
-    qr_code[3][18 + 2] = 1;
-    qr_code[3][18 + 3] = 1;
-    qr_code[3][18 + 4] = 1;
-    qr_code[4][18 + 2] = 1;
-    qr_code[4][18 + 3] = 1;
-    qr_code[4][18 + 4] = 1;
+    qr_code[0][(SIZE - 7) + 0] = 1;
+    qr_code[0][(SIZE - 7) + 1] = 1;
+    qr_code[0][(SIZE - 7) + 2] = 1;
+    qr_code[0][(SIZE - 7) + 3] = 1;
+    qr_code[0][(SIZE - 7) + 4] = 1;
+    qr_code[0][(SIZE - 7) + 5] = 1;
+    qr_code[0][(SIZE - 7) + 6] = 1;
+    qr_code[1][(SIZE - 7) + 0] = 1;
+    qr_code[2][(SIZE - 7) + 0] = 1;
+    qr_code[3][(SIZE - 7) + 0] = 1;
+    qr_code[4][(SIZE - 7) + 0] = 1;
+    qr_code[5][(SIZE - 7) + 0] = 1;
+    qr_code[6][(SIZE - 7) + 0] = 1;
+    qr_code[6][(SIZE - 7) + 1] = 1;
+    qr_code[6][(SIZE - 7) + 2] = 1;
+    qr_code[6][(SIZE - 7) + 3] = 1;
+    qr_code[6][(SIZE - 7) + 4] = 1;
+    qr_code[6][(SIZE - 7) + 5] = 1;
+    qr_code[6][(SIZE - 7) + 6] = 1;
+    qr_code[1][(SIZE - 7) + 6] = 1;
+    qr_code[2][(SIZE - 7) + 6] = 1;
+    qr_code[3][(SIZE - 7) + 6] = 1;
+    qr_code[4][(SIZE - 7) + 6] = 1;
+    qr_code[5][(SIZE - 7) + 6] = 1;
+    qr_code[2][(SIZE - 7) + 2] = 1;
+    qr_code[2][(SIZE - 7) + 3] = 1;
+    qr_code[2][(SIZE - 7) + 4] = 1;
+    qr_code[3][(SIZE - 7) + 2] = 1;
+    qr_code[3][(SIZE - 7) + 3] = 1;
+    qr_code[3][(SIZE - 7) + 4] = 1;
+    qr_code[4][(SIZE - 7) + 2] = 1;
+    qr_code[4][(SIZE - 7) + 3] = 1;
+    qr_code[4][(SIZE - 7) + 4] = 1;
 }
 
-void write_aligment_pattern() {
-    qr_code[18][18] = 1;
-    qr_code[16][16] = 1;
-    qr_code[16][17] = 1;
-    qr_code[16][18] = 1;
-    qr_code[16][19] = 1;
-    qr_code[16][20] = 1;
-    qr_code[17][16] = 1;
-    qr_code[18][16] = 1;
-    qr_code[19][16] = 1;
-    qr_code[20][16] = 1;
-    qr_code[20][16] = 1;
-    qr_code[20][17] = 1;
-    qr_code[20][18] = 1;
-    qr_code[20][19] = 1;
-    qr_code[20][20] = 1;
-    qr_code[17][20] = 1;
-    qr_code[18][20] = 1;
-    qr_code[19][20] = 1;
+void draw_alignment(u32 r, u32 c) {
+    for (i32 dr = -2; dr <= 2; dr++) {
+        for (i32 dc = -2; dc <= 2; dc++) {
+            if (dr == -2 || dr == 2 || dc == -2 || dc == 2 ||
+                (dr == 0 && dc == 0)) {
+                qr_code[r + dr][c + dc] = 1;
+            } else {
+                qr_code[r + dr][c + dc] = 0;
+            }
+        }
+    }
 }
+
+void write_aligment_pattern() { draw_alignment(SIZE - 7, SIZE - 7); }
 
 void write_timing() {
-    qr_code[6][8] = 1;
-    qr_code[6][10] = 1;
-    qr_code[6][12] = 1;
-    qr_code[6][14] = 1;
-    qr_code[6][16] = 1;
-    qr_code[8][6] = 1;
-    qr_code[10][6] = 1;
-    qr_code[12][6] = 1;
-    qr_code[14][6] = 1;
-    qr_code[16][6] = 1;
+    for (u32 i = 8; i < SIZE - 7; i += 2) {
+        qr_code[6][i] = 1;
+        qr_code[i][6] = 1;
+    }
 }
 
 // }}}
@@ -169,7 +174,7 @@ void write_timing() {
 // {{{ Bitstream
 
 typedef struct {
-    u8 data[128];
+    u8 data[400];
     u32 len;
 } bit_stream;
 
@@ -200,7 +205,8 @@ void encode_byte_mode(char *input, bit_stream *bs, data_format fmt) {
 
     u8 pad_bytes[] = {0xEC, 0x11};
     i32 i = 0;
-    while (bs->len / 8 < 28) {
+
+    while (bs->len / 8 < DATA_BYTES) {
         bs_append(bs, pad_bytes[i++ % 2], 8);
     }
 }
@@ -233,11 +239,18 @@ u8 gf_mul(u8 a, u8 b) {
     return gf_exp[gf_log[a] + gf_log[b]];
 }
 
-static const u8 gen_poly_16[] = {59,  13, 104, 189, 68, 209, 30, 8,
-                                 163, 65, 41,  229, 98, 50,  36, 59};
+static const u8 gen_poly_16[16] = {59,  13, 104, 189, 68, 209, 30, 8,
+                                   163, 65, 41,  229, 98, 50,  36, 59};
+
+static const u8 gen_poly_18[18] = {215, 234, 158, 94,  184, 97, 118, 170, 79,
+                                   187, 152, 148, 252, 179, 5,  98,  96,  153};
+
+static const u8 gen_poly_26[26] = {246, 51,  183, 4,   136, 98,  199, 152, 77,
+                                   56,  206, 24,  145, 40,  209, 117, 233, 42,
+                                   135, 68,  70,  144, 146, 77,  43,  94};
 
 void reed_solomon_16(u8 *data, u32 data_len, u8 *ec) {
-    u8 buf[44] = {0};
+    u8 buf[200] = {0};
     memcpy(buf, data, data_len);
 
     for (u32 i = 0; i < data_len; i++) {
@@ -252,27 +265,67 @@ void reed_solomon_16(u8 *data, u32 data_len, u8 *ec) {
     memcpy(ec, buf + data_len, 16);
 }
 
+void reed_solomon_18(u8 *data, u32 data_len, u8 *ec) {
+    u8 buf[200] = {0};
+    memcpy(buf, data, data_len);
+
+    for (u32 i = 0; i < data_len; i++) {
+        u8 coef = buf[i];
+        if (coef == 0) {
+            continue;
+        }
+        for (u32 j = 0; j < 18; j++) {
+            buf[i + 1 + j] ^= gf_mul(gen_poly_18[j], coef);
+        }
+    }
+    memcpy(ec, buf + data_len, 18);
+}
+
+void reed_solomon_26(u8 *data, u32 data_len, u8 *ec) {
+    u8 buf[200] = {0};
+    memcpy(buf, data, data_len);
+
+    for (u32 i = 0; i < data_len; i++) {
+        u8 coef = buf[i];
+        if (coef == 0) {
+            continue;
+        }
+        for (u32 j = 0; j < 26; j++) {
+            buf[i + 1 + j] ^= gf_mul(gen_poly_26[j], coef);
+        }
+    }
+
+    memcpy(ec, buf + data_len, 26);
+}
+
 // }}}
 
 // {{{ Data, format & mask
 
 b8 function_module(u32 r, u32 c) {
-    if (r < 9 && c < 9) {
+    if (r <= 8 && c <= 8) {
         return true;
     }
-    if (r < 9 && c >= SIZE - 8) {
+    if (r <= 8 && c >= SIZE - 8) {
         return true;
     }
-    if (r >= SIZE - 8 && c < 9) {
+    if (r >= SIZE - 8 && c <= 8) {
         return true;
     }
     if (r == 6 || c == 6) {
         return true;
     }
-    if (r >= 16 && r <= 20 && c >= 16 && c <= 20) {
+    u32 align = SIZE - 7;
+    if (r >= align - 2 && r <= align + 2 && c >= align - 2 && c <= align + 2) {
         return true;
     }
-    if (r == (4 * 2) + 9 && c == 8) {
+    if (r == 8 && (c <= 8 || c >= SIZE - 8)) {
+        return true;
+    }
+    if (c == 8 && (r <= 8 || r >= SIZE - 8)) {
+        return true;
+    }
+    if (r == (4 * VERSION) + 9 && c == 8) {
         return true;
     }
     return false;
@@ -369,40 +422,6 @@ void apply_mask(mask m) {
             }
         }
     }
-    switch (m) {
-    case MASK_0: {
-        for (u32 r = 0; r < SIZE; r++) {
-            for (u32 c = 0; c < SIZE; c++) {
-                if (!function_module(r, c) && r % 2 == 0 && c % 2 == 0) {
-                    qr_code[r][c] = qr_code[r][c] == 0 ? 1 : 0;
-                }
-            }
-        }
-        break;
-    }
-    case MASK_1: {
-        for (u32 r = 0; r < SIZE; r++) {
-            for (u32 c = 0; c < SIZE; c++) {
-                if (!function_module(r, c) && r % 2 == 0) {
-                    qr_code[r][c] = qr_code[r][c] == 0 ? 1 : 0;
-                }
-            }
-        }
-        break;
-    }
-    case MASK_2: {
-        for (u32 r = 0; r < SIZE; r++) {
-            for (u32 c = 0; c < SIZE; c++) {
-                if (!function_module(r, c) && c % 3 == 0) {
-                    qr_code[r][c] = qr_code[r][c] == 0 ? 1 : 0;
-                }
-            }
-        }
-        break;
-    }
-    default:
-        break;
-    }
 }
 
 static const u16 FMT_M[8] = {0x5412, 0x5125, 0x5E7C, 0x5B4B,
@@ -427,15 +446,17 @@ void write_fmt(mask m) {
         qr_code[row_seq[i]][8] = bit;
     }
     for (u32 i = 0; i < 8; i++) {
-        qr_code[8][17 + i] = (fmt >> i) & 1;
+        qr_code[8][SIZE - 8 + i] = (fmt >> i) & 1;
     }
     for (u32 i = 0; i < 8; i++) {
-        qr_code[24 - i][8] = (fmt >> i) & 1;
+        qr_code[SIZE - 1 - i][8] = (fmt >> i) & 1;
     }
-    qr_code[(4 * 2) + 9][8] = 1;
+    qr_code[(4 * VERSION) + 9][8] = 1;
 }
 
 // }}}
+
+// {{{ QR Code
 
 void qr_encode(char *input, data_format fmt) {
     gf_init();
@@ -443,33 +464,79 @@ void qr_encode(char *input, data_format fmt) {
     bit_stream bs;
     encode_byte_mode(input, &bs, fmt);
 
-    u8 ec[16];
-    reed_solomon_16(bs.data, 28, ec);
+#if VERSION == 4
+    u8 block1[DATA_BYTES / 2];
+    u8 block2[DATA_BYTES / 2];
 
-    u8 final_cw[44];
-    memcpy(final_cw, bs.data, 28);
-    memcpy(final_cw + 28, ec, 16);
+    memcpy(block1, bs.data, DATA_BYTES / 2);
+    memcpy(block2, bs.data + (DATA_BYTES / 2), DATA_BYTES / 2);
 
-    place_data(final_cw, 44);
+    u8 ec1[EC_BYTES / 2];
+    u8 ec2[EC_BYTES / 2];
+
+    reed_solomon_18(block1, DATA_BYTES / 2, ec1);
+    reed_solomon_18(block2, DATA_BYTES / 2, ec2);
+
+    u8 final_cw[TOTAL_CW];
+    u32 idx = 0;
+
+    for (u32 i = 0; i < DATA_BYTES / 2; i++) {
+        final_cw[idx++] = block1[i];
+        final_cw[idx++] = block2[i];
+    }
+
+    for (u32 i = 0; i < EC_BYTES / 2; i++) {
+        final_cw[idx++] = ec1[i];
+        final_cw[idx++] = ec2[i];
+    }
+
+    place_data(final_cw, TOTAL_CW);
+
+#elif VERSION == 2
+    u8 ec[EC_BYTES];
+    reed_solomon_16(bs.data, DATA_BYTES, ec);
+
+    u8 final_cw[TOTAL_CW];
+    memcpy(final_cw, bs.data, DATA_BYTES);
+    memcpy(final_cw + DATA_BYTES, ec, EC_BYTES);
+
+    place_data(final_cw, TOTAL_CW);
+#elif VERSION == 3
+    u8 ec[EC_BYTES];
+    reed_solomon_26(bs.data, DATA_BYTES, ec);
+
+    u8 final_cw[TOTAL_CW];
+    memcpy(final_cw, bs.data, DATA_BYTES);
+    memcpy(final_cw + DATA_BYTES, ec, EC_BYTES);
+
+    place_data(final_cw, TOTAL_CW);
+#endif
 }
 
 void create_qr_code(char *input, data_format fmt, mask mask) {
+#if VERSION == 4 || VERSION == 3 || VERSION == 2
     write_position_detection_patterns();
     write_aligment_pattern();
     write_timing();
     qr_encode(input, fmt);
     apply_mask(mask);
     write_fmt(mask);
+#else
+    fprintf(stderr, "Version not supported!");
+    exit(-1);
+#endif
 }
+
+// }}}
 
 MAIN_PROG main(void) {
     cpl_init_window(800, 800, "QR Code", OPENGL_VER_3_3);
-
-    create_qr_code("www.github.com", DATA_FORMAT_BINARY,
-                   MASK_5);
+    create_qr_code("https://www.youtube.com/@ColinIndieDev", DATA_FORMAT_BINARY, MASK_5);
 
     while (!cpl_window_should_close()) {
         cpl_update();
+
+        pixel_size = CPM_MIN(cpl_get_screen_width(), cpl_get_screen_height()) / (SIZE + (QUIET * 2));
 
         cpl_clear_background(WHITE);
 
@@ -478,9 +545,10 @@ MAIN_PROG main(void) {
         for (u32 r = 0; r < SIZE; r++) {
             for (u32 c = 0; c < SIZE; c++) {
                 if (qr_code[r][c] == 1) {
-                    cpl_draw_rect(VEC2F(PIXEL_SIZE + (c * PIXEL_SIZE),
-                                        PIXEL_SIZE + (r * PIXEL_SIZE)),
-                                  VEC2F_INIT(PIXEL_SIZE), BLACK, 0);
+                    cpl_draw_rect(
+                        VEC2F((QUIET * pixel_size) + (c * pixel_size),
+                              (QUIET * pixel_size) + (r * pixel_size)),
+                        VEC2F_INIT(pixel_size), BLACK, 0);
                 }
             }
         }
