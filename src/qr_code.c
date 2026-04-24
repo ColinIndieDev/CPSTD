@@ -531,10 +531,25 @@ void create_qr_code(char *input, data_format fmt, mask mask) {
 
 MAIN_PROG main(void) {
     cpl_init_window(800, 800, "QR Code", OPENGL_VER_3_3);
-    create_qr_code("https://www.youtube.com/@ColinIndieDev", DATA_FORMAT_BINARY, MASK_5);
+
+    char link[100];
+    printf("-------------------------------------------------------------------\n");
+    printf("Insert link (Note that these versions may be restricted by data)\n");
+    printf("-------------------------------------------------------------------\n");
+    printf("Link >> ");
+    fgets(link, sizeof(link), stdin);
+
+    // If using it for videos on yt, please avoid https or www to save data space:
+    // youtube.com/watch?v=xvFZjo5PgG0
+
+    create_qr_code(link, DATA_FORMAT_BINARY, MASK_5);
 
     while (!cpl_window_should_close()) {
         cpl_update();
+
+        if (cpl_is_key_pressed(CPL_KEY_ESCAPE)) {
+            cpl_destroy_window();
+        }
 
         pixel_size = CPM_MIN(cpl_get_screen_width(), cpl_get_screen_height()) / (SIZE + (QUIET * 2));
 

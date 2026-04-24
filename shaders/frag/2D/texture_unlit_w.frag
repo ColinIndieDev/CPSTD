@@ -1,6 +1,9 @@
-#version 330 core
+#version 300 es
+precision mediump float;
+
 out vec4 frag_color;
 
+in vec2 frag_pos;
 in vec2 tex_coord;
 
 uniform sampler2D tex;

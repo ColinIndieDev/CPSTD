@@ -7,7 +7,7 @@
 #endif
 
 #define SURPRISE false
-#define SHOW_DETAILS true
+#define SHOW_DETAILS false
 
 // {{{ Start animation
 

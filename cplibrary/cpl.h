@@ -391,6 +391,7 @@ typedef enum {
     CPL_SHAPE_2D_LIT,
     CPL_TEXT,
     CPL_TEXTURE_2D_UNLIT,
+    CPL_TEXTURE_2D_LIT,
     CPL_DRAW_MODES_COUNT
 } cpl_draw_mode;
 
@@ -500,6 +501,7 @@ void cpl_display_details(font *font);
 // }}}
 
 #define CPL_IMPLEMENTATION
+
 #ifdef CPL_IMPLEMENTATION
 
 // {{{ Logging
@@ -1729,9 +1731,201 @@ void cpl_tilemap_draw(tilemap *m, shader *s) {
 
 // {{{ Particle System
 
-typedef struct {
+#define UNLIMITED_PARTICLES 0
 
+#define PARTICLE(pos, size, dir, color, life_time, rot, tex)                   \
+    (particle) { pos, size, dir, color, 0, life_time, rot, tex, true }
+
+typedef struct {
+    vec2f pos;
+    vec2f size;
+    vec2f dir;
+    vec4f color;
+    f32 cur_life_time;
+    f32 life_time;
+    f32 rot;
+    texture *tex;
+    b8 active;
 } particle;
+
+VEC_DEF(particle, vec_particle)
+
+typedef struct {
+    vec2f pos;
+    u32 max_particles;
+
+    vec_particle particles;
+} particle_system;
+
+void cpl_create_particle_system(particle_system *ps, vec2f pos,
+                                u32 max_particles, u32 start_size) {
+    ps->pos = pos;
+    ps->max_particles = max_particles;
+    vec_particle_reserve(&ps->particles, start_size);
+}
+
+void cpl_update_particle_system(particle_system *ps) {
+    FOREACH_VEC(particle, vec_particle, p, &ps->particles) {
+        p->cur_life_time += cpl_get_dt();
+        p->pos = vec2f_add(
+            &VEC2F(p->dir.x * cpl_get_dt(), p->dir.y * cpl_get_dt()), &p->pos);
+        if (p->cur_life_time >= p->life_time) {
+            p->active = false;
+        }
+    }
+
+    VEC_ERASE_IF(&ps->particles, !it.active);
+}
+
+void cpl_draw_particles(particle_system *ps) {
+    FOREACH_VEC(particle, vec_particle, p, &ps->particles) {
+        cpl_draw_texture2D(p->tex, p->pos, p->size, p->color, p->rot);
+    }
+}
+
+void cpl_add_particle(particle_system *ps, particle p) {
+    if (ps->particles.size < ps->max_particles || ps->max_particles == 0) {
+        vec_particle_push_back(&ps->particles, p);
+    }
+}
+// }}}
+
+// {{{ Shadow 2D
+
+#define MAX_RECT_SHADOWS 1024
+
+typedef struct {
+    vec2f pos;
+    vec2f size;
+} rect_shadow;
+
+rect_shadow rect_shadows[MAX_RECT_SHADOWS];
+u32 rect_shadow_count = 0;
+
+void cpl_begin_shadow_cast_2D() {
+    glEnable(GL_STENCIL_TEST);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    cpl_begin_draw(CPL_SHAPE_2D_UNLIT, true);
+}
+
+void cpl_end_shadow_cast_2D(f32 ambient, f32 shadow_strength,
+                            color shadow_color) {
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    f32 shadow_alpha = CPM_CLAMP(shadow_strength - ambient, 0, 1);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    cpl_begin_draw(CPL_SHAPE_2D_UNLIT, false);
+    cpl_draw_rect(VEC2F_INIT(0), cpl_get_screen_size(),
+                  RGBA(shadow_color.r, shadow_color.g, shadow_color.b,
+                       255 * shadow_alpha),
+                  0);
+    glDisable(GL_STENCIL_TEST);
+}
+
+void cpl_submit_rect_shadow(vec2f pos, vec2f size) {
+    if (rect_shadow_count < MAX_RECT_SHADOWS) {
+        rect_shadows[rect_shadow_count++] = (rect_shadow){pos, size};
+    }
+}
+
+// TODO make ts somehow work
+
+void cpl_draw_triangle_shadow(vec2f a, vec2f b, vec2f c) {
+    f32 vertices[9] = {
+        a.x, a.y, 0.0f, b.x, b.y, 0.0f, c.x, c.y, 0.0f,
+    };
+    u32 vao;
+    u32 vbo;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32),
+                          (void *)NULL);
+    glEnableVertexAttribArray(0);
+    mat4f transform;
+    mat4f_identity(&transform);
+    cpl_shader_set_mat4f(&cpl_shaders[CPL_SHAPE_2D_UNLIT], "transform",
+                         transform);
+    cpl_shader_set_rgba(&cpl_shaders[CPL_SHAPE_2D_UNLIT], "input_color",
+                        &(vec4f){0.0f, 0.0f, 0.0f, 1.0f});
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+}
+
+void cpl_draw_rect_shadow(vec2f pos, vec2f size, point_light_2D *lights, u32 n,
+                          f32 far) {
+    vec2f corners[4] = {
+        {pos.x, pos.y},
+        {pos.x + size.x, pos.y},
+        {pos.x + size.x, pos.y + size.y},
+        {pos.x, pos.y + size.y},
+    };
+    vec2f normals[4] = {
+        {0, -1},
+        {1, 0},
+        {0, 1},
+        {-1, 0},
+    };
+    for (u32 l = 0; l < n; l++) {
+        for (u32 i = 0; i < 4; i++) {
+            u32 next = (i + 1) % 4;
+            vec2f a = corners[i];
+            vec2f b = corners[next];
+            vec2f mid = {(a.x + b.x) * 0.5f, (a.y + b.y) * 0.5f};
+            vec2f to_edge = {mid.x - lights[l].pos.x, mid.y - lights[l].pos.y};
+            f32 d = (normals[i].x * to_edge.x) + (normals[i].y * to_edge.y);
+            if (d <= 0) {
+                continue;
+            }
+            vec2f dir_a = {a.x - lights[l].pos.x, a.y - lights[l].pos.y};
+            f32 len_a = cpm_sqrt((dir_a.x * dir_a.x) + (dir_a.y * dir_a.y));
+            dir_a.x /= len_a;
+            dir_a.y /= len_a;
+            vec2f dir_b = {b.x - lights[l].pos.x, b.y - lights[l].pos.y};
+            f32 len_b = cpm_sqrt((dir_b.x * dir_b.x) + (dir_b.y * dir_b.y));
+            dir_b.x /= len_b;
+            dir_b.y /= len_b;
+            vec2f a2 = {a.x + (dir_a.x * far), a.y + (dir_a.y * far)};
+            vec2f b2 = {b.x + (dir_b.x * far), b.y + (dir_b.y * far)};
+            cpl_draw_triangle_shadow(a, b, b2);
+            cpl_draw_triangle_shadow(a, b2, a2);
+        }
+    }
+}
+
+void cpl_draw_shadows(point_light_2D *lights, u32 light_count, f32 far, f32 shadow_strength) {
+    glEnable(GL_STENCIL_TEST);
+    
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+    for (u32 l = 0; l < light_count; l++) {
+        for (u32 i = 0; i < rect_shadow_count; i++) {
+            cpl_draw_rect_shadow(rect_shadows[i].pos, rect_shadows[i].size, &lights[l], 1, far);
+        }
+    }
+
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glStencilFunc(GL_EQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    cpl_begin_draw(CPL_SHAPE_2D_UNLIT, false);
+    cpl_draw_rect(VEC2F_INIT(0), cpl_get_screen_size(),
+                  RGBA(0, 0, 0, (u8)(255 * shadow_strength)), 0);
+
+    glDisable(GL_STENCIL_TEST);
+    rect_shadow_count = 0;
+}
 
 // }}}
 
@@ -1832,7 +2026,10 @@ void cpl_init_shaders() {
                       "shaders/frag/2D/text.frag");
     cpl_create_shader(&cpl_shaders[CPL_TEXTURE_2D_UNLIT],
                       "shaders/vert/2D/texture.vert",
-                      "shaders/frag/2D/texture.frag");
+                      "shaders/frag/2D/texture_unlit.frag");
+    cpl_create_shader(&cpl_shaders[CPL_TEXTURE_2D_LIT],
+                      "shaders/vert/2D/texture.vert",
+                      "shaders/frag/2D/texture_lit.frag");
 #else
     cpl_create_shader(&cpl_shaders[CPL_SHAPE_2D_UNLIT],
                       "/shaders/vert/2D/shape_w.vert",
@@ -1844,7 +2041,10 @@ void cpl_init_shaders() {
                       "/shaders/frag/2D/text_w.frag");
     cpl_create_shader(&cpl_shaders[CPL_TEXTURE_2D_UNLIT],
                       "/shaders/vert/2D/texture_w.vert",
-                      "/shaders/frag/2D/texture_w.frag");
+                      "/shaders/frag/2D/texture_unlit_w.frag");
+    cpl_create_shader(&cpl_shaders[CPL_TEXTURE_2D_LIT],
+                      "/shaders/vert/2D/texture_w.vert",
+                      "/shaders/frag/2D/texture_lit_w.frag");
 #endif
 }
 
@@ -1998,7 +2198,9 @@ void cpl_set_ambient_light_2D(f32 strength) {
     cpl_use_shader(ss);
     cpl_shader_set_f32(ss, "ambient", strength);
 
-    // TODO add for texture 2D extra version if texture_lit exists
+    shader *ts = &cpl_shaders[CPL_TEXTURE_2D_LIT];
+    cpl_use_shader(ts);
+    cpl_shader_set_f32(ts, "ambient", strength);
 
     cpl_reset_shader();
 }
@@ -2008,7 +2210,10 @@ void cpl_set_global_light_2D(global_light_2D *l) {
     cpl_shader_set_f32(ss, "g_light.intensity", l->intensity);
     cpl_shader_set_rgba(ss, "g_light.color", &l->color);
 
-    // TODO add for texture 2D extra version if texture_lit exists
+    shader *ts = &cpl_shaders[CPL_TEXTURE_2D_LIT];
+    cpl_use_shader(ts);
+    cpl_shader_set_f32(ts, "g_light.intensity", l->intensity);
+    cpl_shader_set_rgba(ts, "g_light.color", &l->color);
 
     cpl_reset_shader();
 }
@@ -2034,104 +2239,27 @@ void cpl_add_point_lights_2D(point_light_2D *ls, u32 size) {
         cpl_shader_set_rgba(ss, color, &ls[i].color);
     }
 
-    // TODO add for texture 2D extra version if texture_lit exists
+    shader *ts = &cpl_shaders[CPL_TEXTURE_2D_LIT];
+    cpl_use_shader(ts);
+
+    cpl_shader_set_i32(ts, "point_lights_cnt", (i32)size);
+    for (u32 i = 0; i < size; i++) {
+        char pos[50];
+        snprintf(pos, 50, "point_lights[%d].pos", i);
+        char radius[50];
+        snprintf(radius, 50, "point_lights[%d].r", i);
+        char intensity[50];
+        snprintf(intensity, 50, "point_lights[%d].intensity", i);
+        char color[50];
+        snprintf(color, 50, "point_lights[%d].color", i);
+
+        cpl_shader_set_vec2f(ts, pos, &ls[i].pos);
+        cpl_shader_set_f32(ts, radius, ls[i].radius);
+        cpl_shader_set_f32(ts, intensity, ls[i].intensity);
+        cpl_shader_set_rgba(ts, color, &ls[i].color);
+    }
 
     cpl_reset_shader();
-}
-
-// }}}
-
-// {{{ Shadow 2D
-
-void cpl_begin_shadow_cast_2D() {
-    glEnable(GL_STENCIL_TEST);
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    cpl_begin_draw(CPL_SHAPE_2D_UNLIT, true);
-}
-
-void cpl_end_shadow_cast_2D(f32 ambient, f32 shadow_strength,
-                            color shadow_color) {
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glStencilFunc(GL_EQUAL, 1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    f32 shadow_alpha = CPM_CLAMP(shadow_strength - ambient, 0, 1);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    cpl_begin_draw(CPL_SHAPE_2D_UNLIT, false);
-    cpl_draw_rect(VEC2F_INIT(0), cpl_get_screen_size(),
-                  RGBA(shadow_color.r, shadow_color.g, shadow_color.b,
-                       255 * shadow_alpha),
-                  0);
-    glDisable(GL_STENCIL_TEST);
-}
-
-void cpl_draw_triangle_shadow(vec2f a, vec2f b, vec2f c) {
-    f32 vertices[9] = {
-        a.x, a.y, 0.0f, b.x, b.y, 0.0f, c.x, c.y, 0.0f,
-    };
-    u32 vao;
-    u32 vbo;
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(f32),
-                          (void *)NULL);
-    glEnableVertexAttribArray(0);
-    mat4f transform;
-    mat4f_identity(&transform);
-    cpl_shader_set_mat4f(&cpl_shaders[CPL_SHAPE_2D_UNLIT], "transform",
-                         transform);
-    cpl_shader_set_rgba(&cpl_shaders[CPL_SHAPE_2D_UNLIT], "input_color",
-                        &(vec4f){0.0f, 0.0f, 0.0f, 1.0f});
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-}
-
-void cpl_draw_rect_shadow(vec2f pos, vec2f size, point_light_2D *lights, u32 n,
-                          f32 far) {
-    vec2f corners[4] = {
-        {pos.x, pos.y},
-        {pos.x + size.x, pos.y},
-        {pos.x + size.x, pos.y + size.y},
-        {pos.x, pos.y + size.y},
-    };
-    vec2f normals[4] = {
-        {0, -1},
-        {1, 0},
-        {0, 1},
-        {-1, 0},
-    };
-    for (u32 l = 0; l < n; l++) {
-        for (u32 i = 0; i < 4; i++) {
-            u32 next = (i + 1) % 4;
-            vec2f a = corners[i];
-            vec2f b = corners[next];
-            vec2f mid = {(a.x + b.x) * 0.5f, (a.y + b.y) * 0.5f};
-            vec2f to_edge = {mid.x - lights[l].pos.x, mid.y - lights[l].pos.y};
-            f32 d = (normals[i].x * to_edge.x) + (normals[i].y * to_edge.y);
-            if (d <= 0) {
-                continue;
-            }
-            vec2f dir_a = {a.x - lights[l].pos.x, a.y - lights[l].pos.y};
-            f32 len_a = cpm_sqrt((dir_a.x * dir_a.x) + (dir_a.y * dir_a.y));
-            dir_a.x /= len_a;
-            dir_a.y /= len_a;
-            vec2f dir_b = {b.x - lights[l].pos.x, b.y - lights[l].pos.y};
-            f32 len_b = cpm_sqrt((dir_b.x * dir_b.x) + (dir_b.y * dir_b.y));
-            dir_b.x /= len_b;
-            dir_b.y /= len_b;
-            vec2f a2 = {a.x + (dir_a.x * far), a.y + (dir_a.y * far)};
-            vec2f b2 = {b.x + (dir_b.x * far), b.y + (dir_b.y * far)};
-            cpl_draw_triangle_shadow(a, b, b2);
-            cpl_draw_triangle_shadow(a, b2, a2);
-        }
-    }
 }
 
 // }}}
