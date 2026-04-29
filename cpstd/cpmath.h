@@ -43,7 +43,7 @@ f32 cpm_expf(f32 x) {
 
     i32 bits = (k + 127) << 23;
     f32 pow2k;
-    cp_memcpy(&pow2k, &bits, sizeof(f32));
+    memcpy(&pow2k, &bits, sizeof(f32));
 
     return result * pow2k;
 }
@@ -192,7 +192,7 @@ f32 *mat2D_row_ptr(mat2D *m, u32 row) {
 void mat2D_get_row(mat2D *m, u32 row, f32 *out) {
     assert(row < m->rows);
 
-    cp_memcpy(out, &m->data.data[(u64)row * m->cols], m->cols * sizeof(f32));
+    memcpy(out, &m->data.data[(u64)row * m->cols], m->cols * sizeof(f32));
 }
 
 u32 mat2D_size(mat2D *m) { return m->data.size; }
@@ -245,12 +245,26 @@ typedef union {
         f32 r, g, b, a;
     };
 } vec4f;
+
 typedef union {
     f32 data[3];
     struct {
         f32 x, y, z;
     };
 } vec3f;
+
+typedef union {
+    i32 data[2];
+    struct {
+        i32 x, y;
+    };
+} vec2i;
+
+#define VEC2I_INIT(v)                                                          \
+    (vec2i) { v, v }
+#define VEC2I(x, y)                                                            \
+    (vec2i) { x, y }
+
 typedef union {
     f32 data[2];
     struct {

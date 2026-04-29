@@ -1,9 +1,8 @@
 #pragma once
 
 #include <assert.h>
-
+#include <stdlib.h>
 #include "cpbase.h"
-#include "cpmemory.h"
 
 typedef struct {
     u8 *data;
@@ -15,11 +14,11 @@ void bit_arr_init(bit_arr *a, u32 bits) {
     assert(bits > 0);
     a->bits = bits;
     u32 bytes = (bits + 7) / 8;
-    a->data = cp_calloc(bytes, 1);
+    a->data = calloc(bytes, 1);
 }
 void bit_arr_destroy(bit_arr *a) {
     assert(a != NULLPTR);
-    cp_free(a->data);
+    free(a->data);
     a->bits = 0;
 }
 void bit_arr_set(bit_arr *a, u32 i) {

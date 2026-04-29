@@ -229,12 +229,15 @@ block_meta *request_space(block_meta *last, u32 size) {
         CP_ASAN_UNPOISON(last, META_SIZE);
         last->next = block;
         CP_ASAN_POISON(last, META_SIZE);
+    } else {
+        free_list = block;
     }
     return block;
 }
 
 block_meta *find_free_block(block_meta **last, u32 size) {
     block_meta *cur = free_list;
+    *last = NULLPTR;
     while (cur) {
         CP_ASAN_UNPOISON(cur, META_SIZE);
         if (cur->free && cur->size >= size) {

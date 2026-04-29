@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cpbase.h"
-#include "cpmemory.h"
+#include <stdlib.h>
 
 typedef struct {
     u8 *data;
@@ -11,12 +11,12 @@ typedef struct {
 
 #define STR8(t) (str8){t, sizeof(t) - 1, 0}
 #define STR8_LIT(s) (s).data
-#define STR8_RESERVE(l) (str8){cp_malloc(l), l, 1}
+#define STR8_RESERVE(l) (str8){malloc(l), l, 1}
 
 #define STR8_LIT_CPY(s, t) do { (s).data = t; (s).size = sizeof(t) - 1; } while (0)
 void str8_cpy(str8 *src, str8 *dest) {
     if (dest->heap && !src->heap) {
-        cp_free(dest->data);
+        free(dest->data);
     }
     dest->heap = src->heap;
     dest->data = src->data;
@@ -45,7 +45,7 @@ b8 str8_lit_cmp(str8 *s, const char *t) {
 }
 void str8_destroy(str8 *s) {
     if (s->heap) {
-        cp_free(s->data);
+        free(s->data);
         s->heap = false;
     }
     s->size = 0;

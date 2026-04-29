@@ -8,6 +8,7 @@ typedef unsigned __INT32_TYPE__ u32;
 typedef unsigned __INT64_TYPE__ u64;
 
 typedef char i8;
+typedef char c8;
 typedef __INT16_TYPE__ i16;
 typedef __INT32_TYPE__ i32;
 typedef __INT64_TYPE__ i64;

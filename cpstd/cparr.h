@@ -1,9 +1,9 @@
 #pragma once
 
 #include <assert.h>
-
+#include <stdlib.h>
 #include "cpbase.h"
-#include "cpmemory.h"
+
 
 #define ARR_DEF(type, name)                                                    \
     typedef struct {                                                           \
@@ -13,7 +13,7 @@
     void name##_init(name *a, u32 size) {                                      \
         assert(a != NULLPTR);                                                  \
         assert(size > 0);                                                      \
-        a->data = cp_malloc(size * sizeof(type));                              \
+        a->data = malloc(size * sizeof(type));                                 \
         a->size = size;                                                        \
     }                                                                          \
     type *name##_at(name *a, u32 i) {                                          \
@@ -23,7 +23,7 @@
     }                                                                          \
     void name##_destroy(name *a) {                                             \
         assert(a != NULLPTR);                                                  \
-        cp_free(a->data);                                                      \
+        free(a->data);                                                         \
         a->size = 0;                                                           \
     }                                                                          \
     type *name##_begin(name *a) {                                              \

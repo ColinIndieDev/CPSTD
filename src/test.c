@@ -6,29 +6,29 @@
 void handle_movement() {
     f32 speed = 100.0f;
 
-    if (cpl_is_key_down(CPL_KEY_W)) {
-        cpl_cam_2D.pos.y -= speed * cpl_get_dt() * (1.0f / cpl_cam_2D.zoom);
+    if (cpl_is_key_down(KEY_W)) {
+        cpl_get_cam_2D()->pos.y -= speed * cpl_get_dt() * (1.0f / cpl_get_cam_2D()->zoom);
     }
-    if (cpl_is_key_down(CPL_KEY_S)) {
-        cpl_cam_2D.pos.y += speed * cpl_get_dt() * (1.0f / cpl_cam_2D.zoom);
+    if (cpl_is_key_down(KEY_S)) {
+        cpl_get_cam_2D()->pos.y += speed * cpl_get_dt() * (1.0f / cpl_get_cam_2D()->zoom);
     }
-    if (cpl_is_key_down(CPL_KEY_A)) {
-        cpl_cam_2D.pos.x -= speed * cpl_get_dt() * (1.0f / cpl_cam_2D.zoom);
+    if (cpl_is_key_down(KEY_A)) {
+        cpl_get_cam_2D()->pos.x -= speed * cpl_get_dt() * (1.0f / cpl_get_cam_2D()->zoom);
     }
-    if (cpl_is_key_down(CPL_KEY_D)) {
-        cpl_cam_2D.pos.x += speed * cpl_get_dt() * (1.0f / cpl_cam_2D.zoom);
+    if (cpl_is_key_down(KEY_D)) {
+        cpl_get_cam_2D()->pos.x += speed * cpl_get_dt() * (1.0f / cpl_get_cam_2D()->zoom);
     }
-    if (cpl_is_key_down(CPL_KEY_ESCAPE)) {
+    if (cpl_is_key_down(KEY_ESCAPE)) {
         cpl_destroy_window();
     }
 
-    if (cpl_is_key_down(CPL_KEY_H)) {
-        cpl_cam_2D.zoom += 2 * cpl_get_dt();
+    if (cpl_is_key_down(KEY_H)) {
+        cpl_get_cam_2D()->zoom += 2 * cpl_get_dt();
     }
-    if (cpl_is_key_down(CPL_KEY_N)) {
-        cpl_cam_2D.zoom -= 2 * cpl_get_dt();
+    if (cpl_is_key_down(KEY_N)) {
+        cpl_get_cam_2D()->zoom -= 2 * cpl_get_dt();
     }
-    cpl_cam_2D.zoom = CPM_CLAMP(cpl_cam_2D.zoom, 0.1f, 10);
+    cpl_get_cam_2D()->zoom = CPM_CLAMP(cpl_get_cam_2D()->zoom, 0.1f, 10);
 }
 
 MAIN_PROG main(void) {
@@ -41,10 +41,10 @@ MAIN_PROG main(void) {
     f32 dt = 0.1f;
 
     texture pt;
-    cpl_load_texture(&pt, "assets/images/ball.png", CPL_FILTER_LINEAR);
+    cpl_load_texture(&pt, "assets/images/ball.png", FILTER_LINEAR);
 
     particle_system ps;
-    cpl_create_particle_system(&ps, VEC2F_INIT(400), UNLIMITED_PARTICLES, 100);
+    cpl_create_particle_system(&ps, VEC2F_INIT(400), UNLIMITED_PARTICLES);
 
     while (!cpl_window_should_close()) {
         cpl_update();
@@ -69,7 +69,7 @@ MAIN_PROG main(void) {
 
         cpl_clear_background(BLACK);
 
-        cpl_begin_draw(CPL_SHAPE_2D_LIT, true);
+        cpl_begin_draw(SHAPE_2D_LIT, true);
 
         cpl_set_ambient_light_2D(ambient_intensity);
 
@@ -82,13 +82,13 @@ MAIN_PROG main(void) {
 
         cpl_add_point_lights_2D(light, sizeof(light) / sizeof(point_light_2D));
 
-        cpl_draw_rect(cpl_cam_2D.pos, cpl_get_screen_size(), WHITE, 0);
+        cpl_draw_rect(cpl_get_cam_2D()->pos, cpl_get_screen_size(), WHITE, 0);
 
         cpl_draw_rect(VEC2F(300, 300), VEC2F_INIT(100), RED, 0);
 
         cpl_draw_rect(VEC2F(400, 400), VEC2F_INIT(300), BLUE, 0);
 
-        cpl_begin_draw(CPL_TEXTURE_2D_LIT, true);
+        cpl_begin_draw(TEXTURE_2D_LIT, true);
 
         cpl_draw_particles(&ps);
 

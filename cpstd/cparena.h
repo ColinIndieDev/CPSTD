@@ -1,10 +1,9 @@
 #pragma once
 
-#include <assert.h>
-
 #include "cpbase.h"
 #include "cpmath.h"
-#include "cpmemory.h"
+#include <assert.h>
+#include <stdlib.h>
 
 typedef struct {
     u64 capacity;
@@ -17,14 +16,14 @@ typedef struct {
 
 mem_arena *mem_arena_create(u64 capacity) {
     assert(capacity > 0);
-    mem_arena *arena = cp_malloc(capacity);
+    mem_arena *arena = malloc(capacity);
     arena->capacity = capacity;
     arena->pos = ARENA_BASE_POS;
 
     return arena;
 }
 
-void mem_arena_destroy(mem_arena *arena) { cp_free(arena); }
+void mem_arena_destroy(mem_arena *arena) { free(arena); }
 
 void *mem_arena_push(mem_arena *arena, u64 size, b8 zero) {
     u64 pos_aligned = ALIGN_POW2(arena->pos, ARENA_ALIGN);
@@ -36,7 +35,7 @@ void *mem_arena_push(mem_arena *arena, u64 size, b8 zero) {
     u8 *out = (u8 *)arena + pos_aligned;
 
     if (zero) {
-        cp_memset(out, 0, size);
+        memset(out, 0, size);
     }
 
     return out;

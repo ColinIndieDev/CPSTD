@@ -25,12 +25,12 @@
         capacity = CPM_MAX(8, capacity);                                       \
         m->capacity = capacity;                                                \
         m->size = 0;                                                           \
-        m->data = cp_malloc(capacity * sizeof(name##_entry));                  \
-        cp_memset(m->data, 0, capacity * sizeof(name##_entry));                \
+        m->data = malloc(capacity * sizeof(name##_entry));                     \
+        memset(m->data, 0, capacity * sizeof(name##_entry));                   \
     }                                                                          \
     void name##_destroy(name *m) {                                             \
         assert(m != NULLPTR);                                                  \
-        cp_free(m->data);                                                      \
+        free(m->data);                                                         \
         m->capacity = 0;                                                       \
         m->size = 0;                                                           \
     }                                                                          \
@@ -48,8 +48,8 @@
         name##_entry *old_data = m->data;                                      \
         u32 old_capacity = m->capacity;                                        \
         u32 new_capacity = old_capacity * 2;                                   \
-        m->data = cp_malloc(new_capacity * sizeof(name##_entry));              \
-        cp_memset(m->data, 0, new_capacity * sizeof(name##_entry));            \
+        m->data = malloc(new_capacity * sizeof(name##_entry));                 \
+        memset(m->data, 0, new_capacity * sizeof(name##_entry));               \
         m->capacity = new_capacity;                                            \
         m->size = 0;                                                           \
         for (u32 i = 0; i < old_capacity; i++) {                               \
@@ -63,7 +63,7 @@
                 m->data[idx].state = HASH_OCCUPIED;                            \
             }                                                                  \
         }                                                                      \
-        cp_free(old_data);                                                     \
+        free(old_data);                                                        \
     }                                                                          \
     void name##_put(name *m, key_type key, val_type value) {                   \
         assert(m != NULLPTR);                                                  \
@@ -136,12 +136,12 @@
         capacity = CPM_MAX(8, capacity);                                       \
         s->capacity = capacity;                                                \
         s->size = 0;                                                           \
-        s->data = cp_malloc(capacity * sizeof(name##_entry));                  \
-        cp_memset(s->data, 0, capacity * sizeof(name##_entry));                \
+        s->data = malloc(capacity * sizeof(name##_entry));                     \
+        memset(s->data, 0, capacity * sizeof(name##_entry));                   \
     }                                                                          \
     void name##_destroy(name *s) {                                             \
         assert(s != NULLPTR);                                                  \
-        cp_free(s->data);                                                      \
+        free(s->data);                                                         \
         s->capacity = 0;                                                       \
         s->size = 0;                                                           \
     }                                                                          \
@@ -159,8 +159,8 @@
         name##_entry *old_data = s->data;                                      \
         u32 old_capacity = s->capacity;                                        \
         u32 new_capacity = old_capacity * 2;                                   \
-        s->data = cp_malloc(new_capacity * sizeof(name##_entry));              \
-        cp_memset(s->data, 0, new_capacity * sizeof(name##_entry));            \
+        s->data = malloc(new_capacity * sizeof(name##_entry));                 \
+        memset(s->data, 0, new_capacity * sizeof(name##_entry));               \
         s->capacity = new_capacity;                                            \
         s->size = 0;                                                           \
         for (u32 i = 0; i < old_capacity; i++) {                               \
@@ -173,7 +173,7 @@
                 s->data[idx].state = HASH_OCCUPIED;                            \
             }                                                                  \
         }                                                                      \
-        cp_free(old_data);                                                     \
+        free(old_data);                                                        \
     }                                                                          \
     void name##_put(name *s, key_type key) {                                   \
         assert(s != NULLPTR);                                                  \

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
-
-#include "cpmemory.h"
 
 #define VEC_DEF(type, name)                                                    \
     typedef struct {                                                           \
@@ -13,7 +13,7 @@
     void name##_init(name *v, u32 size, type val) {                            \
         assert(v != NULLPTR);                                                  \
         v->capacity = size > 10 ? size * 2 : 10;                               \
-        v->data = cp_malloc(v->capacity * sizeof(type));                       \
+        v->data = malloc(v->capacity * sizeof(type));                          \
         v->size = size;                                                        \
         for (u32 i = 0; i < v->size; i++) {                                    \
             v->data[i] = val;                                                  \
@@ -23,7 +23,7 @@
         assert(v != NULLPTR);                                                  \
         assert(size > 0);                                                      \
         v->capacity = size;                                                    \
-        v->data = cp_malloc(v->capacity * sizeof(type));                       \
+        v->data = malloc(v->capacity * sizeof(type));                          \
         v->size = 0;                                                           \
     }                                                                          \
     type *name##_at(name *v, u32 i) {                                          \
@@ -40,7 +40,7 @@
         assert(v != NULLPTR);                                                  \
         if (v->size >= v->capacity) {                                          \
             v->capacity *= 2;                                                  \
-            type *temp = cp_realloc(v->data, v->capacity * sizeof(type));      \
+            type *temp = realloc(v->data, v->capacity * sizeof(type));         \
             assert(temp != NULLPTR);                                           \
             v->data = temp;                                                    \
         }                                                                      \
@@ -51,13 +51,13 @@
         assert(v != NULLPTR);                                                  \
         if (v->size >= v->capacity) {                                          \
             type *new_data =                                                   \
-                cp_realloc(v->data, (u64)v->capacity * 2 * sizeof(type));      \
+                realloc(v->data, (u64)v->capacity * 2 * sizeof(type));         \
             if (new_data != NULLPTR) {                                         \
                 v->capacity *= 2;                                              \
                 v->data = new_data;                                            \
             }                                                                  \
         }                                                                      \
-        cp_memmove(&v->data[1], &v->data[0], v->size * sizeof(type));          \
+        memmove(&v->data[1], &v->data[0], v->size * sizeof(type));          \
         v->data[0] = val;                                                      \
         v->size++;                                                             \
     }                                                                          \
@@ -69,19 +69,19 @@
     void name##_pop_front(name *v) {                                           \
         assert(v != NULLPTR);                                                  \
         assert(v->size > 0);                                                   \
-        cp_memmove(&v->data[0], &v->data[1], (v->size - 1) * sizeof(type));    \
+        memmove(&v->data[0], &v->data[1], (v->size - 1) * sizeof(type));    \
         v->size--;                                                             \
     }                                                                          \
     void name##_delete(name *v, u32 i) {                                       \
         assert(v != NULLPTR);                                                  \
         assert(0 <= i && i < v->size && v->size > 0);                          \
-        cp_memmove(&v->data[i], &v->data[i + 1],                               \
+        memmove(&v->data[i], &v->data[i + 1],                               \
                    (v->size - i - 1) * sizeof(type));                          \
         v->size--;                                                             \
     }                                                                          \
     void name##_destroy(name *v) {                                             \
         assert(v != NULLPTR);                                                  \
-        cp_free(v->data);                                                      \
+        free(v->data);                                                         \
         v->size = 0;                                                           \
         v->capacity = 0;                                                       \
     }                                                                          \
@@ -96,10 +96,10 @@
         dest->capacity = v->capacity;                                          \
         if (dest->capacity < v->size) {                                        \
             if (dest->data != NULLPTR) {                                       \
-                cp_free(dest->data);                                           \
+                free(dest->data);                                              \
             }                                                                  \
             dest->capacity = v->size * 2;                                      \
-            dest->data = cp_malloc((u64)v->size * 2 * sizeof(type));           \
+            dest->data = malloc((u64)v->size * 2 * sizeof(type));              \
         }                                                                      \
         for (int i = 0; i < v->size; i++) {                                    \
             dest->data[i] = v->data[i];                                        \

@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include "cpbase.h"
-#include "cpmemory.h"
+#include <stdlib.h>
 
 #define QUEUE_DEF(type, name)                                                  \
     typedef struct {                                                           \
@@ -16,7 +16,7 @@
     void name##_init(name *q, u32 capacity) {                                  \
         assert(q != NULLPTR);                                                  \
         assert(capacity > 0);                                                  \
-        q->data = cp_malloc(capacity * sizeof(type));                          \
+        q->data = malloc(capacity * sizeof(type));                             \
         q->capacity = capacity;                                                \
         q->size = 0;                                                           \
         q->head = 0;                                                           \
@@ -24,7 +24,7 @@
     }                                                                          \
     void name##_destroy(name *q) {                                             \
         assert(q != NULLPTR);                                                  \
-        cp_free(q->data);                                                      \
+        free(q->data);                                                         \
         q->capacity = 0;                                                       \
         q->size = 0;                                                           \
         q->head = 0;                                                           \
@@ -33,11 +33,11 @@
     void name##_resize(name *q) {                                              \
         assert(q != NULLPTR);                                                  \
         u32 new_capacity = q->capacity * 2;                                    \
-        type *new_data = cp_malloc(new_capacity * sizeof(type));               \
+        type *new_data = malloc(new_capacity * sizeof(type));                  \
         for (u32 i = 0; i < q->size; i++) {                                    \
             new_data[i] = q->data[(q->tail + i) % q->capacity];                \
         }                                                                      \
-        cp_free(q->data);                                                      \
+        free(q->data);                                                         \
         q->data = new_data;                                                    \
         q->capacity = new_capacity;                                            \
         q->tail = 0;                                                           \
@@ -88,13 +88,13 @@
     void name##_init(name *q, u32 capacity) {                                  \
         assert(q != NULLPTR);                                                  \
         assert(capacity > 0);                                                  \
-        q->data = cp_malloc(capacity * sizeof(name##_node));                   \
+        q->data = malloc(capacity * sizeof(name##_node));                      \
         q->capacity = capacity;                                                \
         q->size = 0;                                                           \
     }                                                                          \
     void name##_destroy(name *q) {                                             \
         assert(q != NULLPTR);                                                  \
-        cp_free(q->data);                                                      \
+        free(q->data);                                                         \
         q->size = 0;                                                           \
         q->capacity = 0;                                                       \
     }                                                                          \
