@@ -125,20 +125,23 @@ endforeach()
 message(STATUS "============================================")
 
 add_executable(${CMAKE_PROJECT_NAME}
-    cpstd/hashmap.c
-    cpstd/vector.c
-    cpstd/bitarr.c
-    cpstd/rand.c
-    cpstd/queue.c
-    cpstd/strings.c
+    #cpstd/hashmap.c
+    #cpstd/vector.c
+    #cpstd/bitarr.c
+    #cpstd/rand.c
+    #cpstd/queue.c
+    #cpstd/strings.c
 
     src/test.c
-    ${SOURCE_FILES}
+    #${SOURCE_FILES}
 )
 
 # OpenMP, pthread, GLFW, GLAD, STB, FT & ENet
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${stb_SOURCE_DIR})
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${enet_SOURCE_DIR}/include)
+
+# cpstd
+find_package(cpstd REQUIRED)
 
 if (NOT EMSCRIPTEN)
     find_package(OpenMP REQUIRED)
@@ -147,7 +150,7 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads glad freetype miniaudio)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads glad freetype miniaudio cpstd::cpstd)
 
 if (NOT EMSCRIPTEN)
     set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)

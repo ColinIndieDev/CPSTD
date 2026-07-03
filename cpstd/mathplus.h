@@ -27,13 +27,14 @@ typedef union {
         float x, y, z;
     };
 } vec3f;
+#define VEC3F(x, y, z)                                                            \
+    (vec3f) { x, y, z }
 typedef union {
     float data[2];
     struct {
         float x, y;
     };
 } vec2f;
-
 #define VEC2F(x, y)                                                            \
     (vec2f) { x, y }
 
@@ -53,9 +54,8 @@ float vec2f_length(vec2f a);
 vec2f vec2f_clamp(vec2f v, vec2f n, vec2f m);
 vec2f vec2f_norm(vec2f v);
 
-typedef struct {
-    float data[4][4];
-} mat4f;
+typedef float mat4f[16];
+
 
 void mat4f_identity(mat4f *m);
 void mat4f_translate(mat4f *m, vec3f v);
