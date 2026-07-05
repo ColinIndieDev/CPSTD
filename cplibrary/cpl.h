@@ -684,7 +684,7 @@ void shader_set_color(shader *s, char *name, color_t c) {
     glUniform4f(glGetUniformLocation(s->id, name), c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, c.a / 255.0f);
 }
 void shader_set_mat4f(shader *s, char *name, mat4f *mat) {
-    glUniformMatrix4fv(glGetUniformLocation(s->id, name), 1, GL_FALSE, (const GLfloat *)mat->data);
+    glUniformMatrix4fv(glGetUniformLocation(s->id, name), 1, GL_FALSE, (const GLfloat *)mat);
 }
 void shader_set_vec2f(shader *s, char *name, vec2f v) {
     glUniform2f(glGetUniformLocation(s->id, name), v.x, v.y);
