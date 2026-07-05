@@ -114,6 +114,7 @@ Others:
 - Key & Mouse Inputs
 - Audio
 - Screenshot
+- Networking (Multiplayer & Voice Chat)
 
 ## Used libraries
 - GLAD
@@ -130,6 +131,10 @@ Others:
 
 - Miniaudio
 > Audio (Sounds & Music)
+> Microphone recording
+
+- ENet
+> Networking with UDP based protocol
 
 ## Building / Setup CPL 
 
