@@ -44,17 +44,17 @@
 #include "../cpstd/mathplus.h"
 #include "../cpstd/vector.h"
 
-// {{{ Key Inputs
+#pragma region Key Inputs
 
 typedef enum {
     MOUSE_BUTTON_1 = 0,
-    MOUSE_BUTTON_2,
-    MOUSE_BUTTON_3,
-    MOUSE_BUTTON_4,
-    MOUSE_BUTTON_5,
-    MOUSE_BUTTON_6,
-    MOUSE_BUTTON_7,
-    MOUSE_BUTTON_8,
+    MOUSE_BUTTON_2 = 1,
+    MOUSE_BUTTON_3 = 2,
+    MOUSE_BUTTON_4 = 3,
+    MOUSE_BUTTON_5 = 4,
+    MOUSE_BUTTON_6 = 5,
+    MOUSE_BUTTON_7 = 6,
+    MOUSE_BUTTON_8 = 7,
     MOUSE_BUTTON_LAST = MOUSE_BUTTON_8,
     MOUSE_BUTTON_LEFT = MOUSE_BUTTON_1,
     MOUSE_BUTTON_RIGHT = MOUSE_BUTTON_2,
@@ -185,9 +185,9 @@ typedef enum {
     KEY_LAST = GLFW_KEY_MENU
 } key_buttons;
 
-// }}}
+#pragma endregion
 
-// {{{ OpenGL Versions
+#pragma region OpenGL Versions
 
 typedef enum {
     OPENGL_VER_1_0 = 10,
@@ -203,9 +203,9 @@ typedef enum {
     OPENGL_VER_4_6 = 46
 } opengl_versions;
 
-// }}}
+#pragma endregion
 
-// {{{ Colors
+#pragma region Colors
 
 typedef vec4f color_t;
 
@@ -230,14 +230,14 @@ typedef vec4f color_t;
 #define DARK_GRAY RGB(64, 64, 64)
 #define BROWN RGB(150, 76, 0)
 
-// }}}
+#pragma endregion
 
 #ifdef __cplusplus
 namespace cpl {
 extern "C" {
 #endif
 
-// {{{ Logging
+#pragma region Logging
 
 typedef enum { 
     LOG_INFO = 0, 
@@ -310,9 +310,9 @@ void cpl_log(log_level level, char *msg, ...) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Screenshot
+#pragma region Screenshot
 
 void screenshot_take(char *path, vec2f screen);
 
@@ -341,9 +341,9 @@ void screenshot_take(char *path, vec2f screen) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Profiler
+#pragma region Profiler
 
 #ifdef __linux__
 
@@ -411,9 +411,9 @@ unsigned int profiler_get_stack_used() {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ OpenGL Debug
+#pragma region OpenGL Debug
 
 GLenum _opengl_debug_check_error(char *path, unsigned int line);
 void opengl_debug_check_error();
@@ -575,9 +575,9 @@ void opengl_debug_enable() {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Shader
+#pragma region Shader
 
 typedef struct {
     unsigned int id;
@@ -695,9 +695,9 @@ void shader_set_vec3f(shader *s, char *name, vec3f v) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Rectangle
+#pragma region Rectangle
 
 typedef struct {
     vec2f pos;
@@ -776,9 +776,9 @@ void rect_draw_raw(shader *s, rect *r) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Triangle
+#pragma region Triangle
 
 typedef struct {
     vec2f pos;
@@ -846,9 +846,9 @@ void triangle_draw_raw(shader *s, triangle *t) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Circle
+#pragma region Circle
 
 typedef struct {
     vec2f pos;
@@ -920,9 +920,9 @@ void circle_draw_raw(shader *s, circle *c) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Line
+#pragma region Line
 
 typedef struct {
     vec2f start, end;
@@ -980,9 +980,9 @@ void line_draw_raw(shader *s, line *l) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Texture & Texture2D
+#pragma region Texture & Texture2D
 
 typedef enum { 
     FILTER_LINEAR = 0, 
@@ -995,9 +995,9 @@ typedef struct {
 } texture;
 
 typedef struct {
+    vec3f rot;
     vec2f pos;
     vec2f size;
-    float rot;
     vec4f color;
     texture *tex;
     unsigned int vbo, vao, ebo;
@@ -1005,9 +1005,9 @@ typedef struct {
 
 void texture_load(texture *t, char *path, texture_filtering filter);
 void texture_unload(texture *t);
-void texture2D_create(texture2D *t, vec2f pos, vec2f size, float rot, vec4f color, texture *tex);
+void texture2D_create(texture2D *t, vec2f pos, vec2f size, vec3f rot, vec4f color, texture *tex);
 void texture2D_destroy(texture2D *t);
-void texture2D_draw_raw(shader *s, texture2D *t);
+void texture2D_draw_raw(shader *s, texture2D *t, vec2f pivot);
 
 #ifdef CPL_IMPL
 
@@ -1046,7 +1046,7 @@ void texture_unload(texture *t) {
         glDeleteTextures(1, &t->id);
     }
 }
-void texture2D_create(texture2D *t, vec2f pos, vec2f size, float rot, vec4f color, texture *tex) {
+void texture2D_create(texture2D *t, vec2f pos, vec2f size, vec3f rot, vec4f color, texture *tex) {
     t->pos = pos;
     t->size = size;
     t->rot = rot;
@@ -1097,16 +1097,22 @@ void texture2D_destroy(texture2D *t) {
     }
     t->tex = NULL;
 }
-void texture2D_draw_raw(shader *s, texture2D *t) {
+void texture2D_draw_raw(shader *s, texture2D *t, vec2f pivot) {
     mat4f transform;
     mat4f_identity(&transform);
 
     mat4f_translate(&transform, (vec3f){t->pos.x, t->pos.y, 0.0f});
-    mat4f_translate(&transform,
-                    (vec3f){t->size.x * 0.5f, t->size.y * 0.5f, 0.0f});
-    mat4f_rotate(&transform, math_rad(t->rot), (vec3f){0.0f, 0.0f, 1.0f});
-    mat4f_translate(&transform,
-                    (vec3f){-t->size.x * 0.5f, -t->size.y * 0.5f, 0.0f});
+    mat4f_translate(&transform, (vec3f){pivot.x, pivot.y, 0.0f});
+    if (t->rot.z != 0.0f) {
+        mat4f_rotate(&transform, math_rad(t->rot.z), (vec3f){0.0f, 0.0f, 1.0f});
+    }
+    if (t->rot.y != 0.0f) {
+        mat4f_rotate(&transform, math_rad(t->rot.y), (vec3f){0.0f, 1.0f, 0.0f});
+    }
+    if (t->rot.x != 0.0f) {
+        mat4f_rotate(&transform, math_rad(t->rot.x), (vec3f){1.0f, 0.0f, 0.0f});
+    }
+    mat4f_translate(&transform, (vec3f){-pivot.x, -pivot.y, 0.0f});
 
     shader_set_int(s, "tex", 0);
     shader_set_mat4f(s, "transform", &transform);
@@ -1122,9 +1128,9 @@ void texture2D_draw_raw(shader *s, texture2D *t) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Text
+#pragma region Text
 
 typedef struct {
     unsigned int id;
@@ -1285,9 +1291,9 @@ vec2f text_get_size(font *f, float scale, char *text, ...) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Networking
+#pragma region Networking
 
 typedef enum {
     NET_PACKET_RELIABLE = 1,
@@ -1313,7 +1319,7 @@ pthread_mutex_t _net_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #endif
 
-// {{{ Client
+#pragma region Client
 
 typedef struct {
     ENetHost *client;
@@ -1462,9 +1468,9 @@ void client_destroy(client_t *client, int wait_ms) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Server
+#pragma region Server
 
 typedef struct {
     ENetHost *server;
@@ -1498,11 +1504,11 @@ void server_destroy(server_t *server) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Packets
+#pragma region Packets
 
-// {{{ Writer
+#pragma region Writer
 
 typedef struct {
     uint8_t data[KiB(5)];
@@ -1564,9 +1570,9 @@ void packet_write_vec2f(packet_writer *writer, vec2f v) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Reader
+#pragma region Reader
 
 typedef struct {
     uint8_t *data;
@@ -1644,7 +1650,7 @@ vec2f packet_read_vec2f(packet_reader *reader) {
 
 #endif
 
-// }}}
+#pragma endregion
 
 void packet_send_to_server(client_t *client, packet_writer *writer, int packet_flag, net_channels channel);
 void packet_send_to_client(ENetPeer *peer, packet_writer *writer, int packet_flag, net_channels channel);
@@ -1674,11 +1680,11 @@ void packet_broadcast(server_t *server, packet_writer *writer, int packet_flag, 
 
 #endif
 
-// }}}
+#pragma endregion
 
-// }}}
+#pragma endregion
 
-// {{{ Audio
+#pragma region Audio
 
 typedef struct {
     char *path;
@@ -1951,9 +1957,9 @@ void audio_init_voice_chat(client_t *client, int *id) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Screen Quad
+#pragma region Screen Quad
 
 typedef struct {
     vec2f size;
@@ -2038,9 +2044,9 @@ void screen_quad_draw(screen_quad *q, shader *s) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Collisions
+#pragma region Collisions
 
 typedef struct {
     vec2f pos;
@@ -2103,9 +2109,9 @@ bool check_collision_vec2f_circle(vec2f a, circle_collider b) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Timing
+#pragma region Timing
 
 #ifdef CPL_IMPL
 
@@ -2178,9 +2184,9 @@ void _update_target_fps() {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Inputs
+#pragma region Inputs
 
 typedef struct {
     vec2f pos;
@@ -2286,9 +2292,9 @@ vec2f get_screen_to_world_2D(vec2f sp) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Window
+#pragma region Window
 
 typedef enum {
     SHAPE_2D_UNLIT = 0,
@@ -2461,9 +2467,11 @@ void end_frame() {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Drawing
+#pragma region Drawing
+
+#define NO_ROTATION (vec3f){0.0f, 0.0f, 0.0f}, VEC2F(0.0f, 0.0f)
 
 void clear_background(vec4f color);
 void begin_draw(draw_mode draw_mode, bool mode_2D);
@@ -2473,7 +2481,7 @@ void draw_circle(vec2f pos, float radius, vec4f color);
 void draw_line(vec2f start, vec2f end, float thickness, vec4f color);
 void draw_text(font *font, vec2f pos, float scale, vec4f color, char *text, ...);
 void draw_text_shadow(font *font, vec2f pos, float scale, vec4f color, vec2f shadow_off, vec4f shadow_color, char *text, ...);
-void draw_texture2D(texture *tex, vec2f pos, vec2f size, vec4f color, float rot);
+void draw_texture2D(texture *tex, vec2f pos, vec2f size, vec4f color, vec3f rot, vec2f pivot);
 void _reset_shader();
 void display_details(font *font);
 
@@ -2542,10 +2550,10 @@ void draw_text_shadow(font *font, vec2f pos, float scale, vec4f color, vec2f sha
     text_draw_raw(&_shaders[_cur_draw_mode], font, buffer, VEC2F(pos.x + shadow_off.x, pos.y + shadow_off.y), scale, shadow_color);
     text_draw_raw(&_shaders[_cur_draw_mode], font, buffer, pos, scale, color);
 }
-void draw_texture2D(texture *tex, vec2f pos, vec2f size, vec4f color, float rot) {
+void draw_texture2D(texture *tex, vec2f pos, vec2f size, vec4f color, vec3f rot, vec2f pivot) {
     texture2D t;
     texture2D_create(&t, pos, size, rot, color, tex);
-    texture2D_draw_raw(&_shaders[_cur_draw_mode], &t);
+    texture2D_draw_raw(&_shaders[_cur_draw_mode], &t, pivot);
     texture2D_destroy(&t);
 }
 void _reset_shader() { shader_use(&_shaders[_cur_draw_mode]); }
@@ -2568,9 +2576,9 @@ void display_details(font *font) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Lighting 2D
+#pragma region Lighting 2D
 
 typedef struct {
     vec2f pos;
@@ -2660,9 +2668,9 @@ void add_point_lights_2D(point_light_2D *ls, unsigned int size) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Tilemap
+#pragma region Tilemap
 
 #define CPL_TILEMAP_GET_UV(m, tx, ty)                                          \
     VEC2F(((tx) * (m).size.x) / (m).tex.size.x,                                \
@@ -2866,9 +2874,9 @@ void tilemap_draw(tilemap *m, vec4f color) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ Particle System
+#pragma region Particle System
 
 #define UNLIMITED_PARTICLES 0
 
@@ -2931,7 +2939,7 @@ void particle_system_update(particle_system *ps) {
 }
 void particle_system_draw(particle_system *ps) {
     foreach_vec(p, ps->particles) {
-        draw_texture2D(p->tex, p->pos, p->size, p->color, p->rot);
+        draw_texture2D(p->tex, p->pos, p->size, p->color, (vec3f){0.0f, 0.0f, p->rot}, p->pos);
     }
 }
 void particle_system_add_particle(particle_system *ps, particle p) {
@@ -2942,9 +2950,9 @@ void particle_system_add_particle(particle_system *ps, particle p) {
 
 #endif
 
-// }}}
+#pragma endregion
 
-// {{{ HDR
+#pragma region HDR
 
 typedef struct {
     unsigned int fbo;
@@ -3033,7 +3041,7 @@ void hdr_apply(bool gamma_correct, float exposure) {
 
 #endif
 
-// }}}
+#pragma endregion
 
 #ifdef __cplusplus
 }
