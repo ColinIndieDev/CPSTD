@@ -45,149 +45,149 @@
 #include "../cpstd/vector.h"
 
 // Available macros
-// #define CPL_IMPL
-// #define CPL_INCLUDE_NETWORKING
-// #define CPL_INCLUDE_DEBUG
+#define CPL_IMPL
+#define CPL_INCLUDE_NETWORKING
+#define CPL_INCLUDE_DEBUG
 
 #pragma region Key Inputs
 
 typedef enum {
-    MOUSE_BUTTON_1 = 0,
-    MOUSE_BUTTON_2 = 1,
-    MOUSE_BUTTON_3 = 2,
-    MOUSE_BUTTON_4 = 3,
-    MOUSE_BUTTON_5 = 4,
-    MOUSE_BUTTON_6 = 5,
-    MOUSE_BUTTON_7 = 6,
-    MOUSE_BUTTON_8 = 7,
-    MOUSE_BUTTON_LAST = MOUSE_BUTTON_8,
-    MOUSE_BUTTON_LEFT = MOUSE_BUTTON_1,
-    MOUSE_BUTTON_RIGHT = MOUSE_BUTTON_2,
-    MOUSE_BUTTON_MIDDLE = MOUSE_BUTTON_3,
+    MOUSE_BUTTON_1      = 0,
+    MOUSE_BUTTON_2      = 1,
+    MOUSE_BUTTON_3      = 2,
+    MOUSE_BUTTON_4      = 3,
+    MOUSE_BUTTON_5      = 4,
+    MOUSE_BUTTON_6      = 5,
+    MOUSE_BUTTON_7      = 6,
+    MOUSE_BUTTON_8      = 7,
+    MOUSE_BUTTON_LAST   = 7,
+    MOUSE_BUTTON_LEFT   = 0,
+    MOUSE_BUTTON_RIGHT  = 1,
+    MOUSE_BUTTON_MIDDLE = 2,
 } mouse_button_t;
 
 typedef enum {
-    KEY_SPACE = 32,
-    KEY_APOSTROPHE = 39,
-    KEY_COMMA = 44,
-    KEY_MINUS,
-    KEY_PERIOD,
-    KEY_SLASH,
-    KEY_DIGIT_0,
-    KEY_DIGIT_1,
-    KEY_DIGIT_2,
-    KEY_DIGIT_3,
-    KEY_DIGIT_4,
-    KEY_DIGIT_5,
-    KEY_DIGIT_6,
-    KEY_DIGIT_7,
-    KEY_DIGIT_8,
-    KEY_DIGIT_9,
-    KEY_SEMICOLON = 59,
-    KEY_EQUAL = 61,
-    KEY_LETTER_A = 65,
-    KEY_LETTER_B,
-    KEY_LETTER_C,
-    KEY_LETTER_D,
-    KEY_LETTER_E,
-    KEY_LETTER_F,
-    KEY_LETTER_G,
-    KEY_LETTER_H,
-    KEY_LETTER_I,
-    KEY_LETTER_J,
-    KEY_LETTER_K,
-    KEY_LETTER_L,
-    KEY_LETTER_M,
-    KEY_LETTER_N,
-    KEY_LETTER_O,
-    KEY_LETTER_P,
-    KEY_LETTER_Q,
-    KEY_LETTER_R,
-    KEY_LETTER_S,
-    KEY_LETTER_T,
-    KEY_LETTER_U,
-    KEY_LETTER_V,
-    KEY_LETTER_W,
-    KEY_LETTER_X,
-    KEY_LETTER_Y,
-    KEY_LETTER_Z,
-    KEY_LEFT_BRACKET,
-    KEY_BACKSLASH,
-    KEY_RIGHT_BRACKET,
-    KEY_GRAVE_ACCENT = 96,
-    KEY_WORLD_1 = 161,
-    KEY_WORLD_2,
-    KEY_ESCAPE = 256,
-    KEY_ENTER,
-    KEY_TAB,
-    KEY_BACKSPACE,
-    KEY_INSERT,
-    KEY_DELETE,
-    KEY_RIGHT_ARROW,
-    KEY_LEFT_ARROW,
-    KEY_DOWN_ARROW,
-    KEY_UP_ARROW,
-    KEY_PAGE_UP,
-    KEY_PAGE_DOWN,
-    KEY_HOME,
-    KEY_END,
-    KEY_CAPS_LOCK = 280,
-    KEY_SCROLL_LOCK,
-    KEY_NUM_LOCK,
-    KEY_PRINT_SCREEN,
-    KEY_PAUSE,
-    KEY_F1 = 290,
-    KEY_F2,
-    KEY_F3,
-    KEY_F4,
-    KEY_F5,
-    KEY_F6,
-    KEY_F7,
-    KEY_F8,
-    KEY_F9,
-    KEY_F10,
-    KEY_F11,
-    KEY_F12,
-    KEY_F13,
-    KEY_F14,
-    KEY_F15,
-    KEY_F16,
-    KEY_F17,
-    KEY_F18,
-    KEY_F19,
-    KEY_F20,
-    KEY_F21,
-    KEY_F22,
-    KEY_F23,
-    KEY_F24,
-    KEY_F25,
-    KEY_KP_0 = 320,
-    KEY_KP_1,
-    KEY_KP_2,
-    KEY_KP_3,
-    KEY_KP_4,
-    KEY_KP_5,
-    KEY_KP_6,
-    KEY_KP_7,
-    KEY_KP_8,
-    KEY_KP_9,
-    KEY_KP_DECIMAL,
-    KEY_KP_DIVIDE,
-    KEY_KP_MULTIPLY,
-    KEY_KP_SUBTRACT,
-    KEY_KP_ADD,
-    KEY_KP_ENTER,
-    KEY_KP_EQUAL,
-    KEY_LEFT_SHIFT = 340,
-    KEY_LEFT_CONTROL,
-    KEY_LEFT_ALT,
-    KEY_LEFT_SUPER,
-    KEY_RIGHT_SHIFT,
-    KEY_RIGHT_CONTROL,
-    KEY_RIGHT_ALT,
-    KEY_RIGHT_SUPER,
-    KEY_MENU,
-    KEY_LAST = GLFW_KEY_MENU
+    KEY_SPACE           = 32,
+    KEY_APOSTROPHE      = 39,
+    KEY_COMMA           = 44,
+    KEY_MINUS           = 45,
+    KEY_PERIOD          = 46,
+    KEY_SLASH           = 47, 
+    KEY_DIGIT_0         = 48,
+    KEY_DIGIT_1			= 49,
+    KEY_DIGIT_2			= 50,
+    KEY_DIGIT_3			= 51,
+    KEY_DIGIT_4			= 52,
+    KEY_DIGIT_5			= 53,
+    KEY_DIGIT_6			= 54,
+    KEY_DIGIT_7			= 55,
+    KEY_DIGIT_8			= 56,
+    KEY_DIGIT_9			= 57,
+    KEY_SEMICOLON       = 59,
+    KEY_EQUAL           = 61,
+    KEY_LETTER_A        = 65,
+    KEY_LETTER_B		= 66,
+    KEY_LETTER_C		= 67,
+    KEY_LETTER_D		= 68,
+    KEY_LETTER_E		= 69,
+    KEY_LETTER_F		= 70,
+    KEY_LETTER_G		= 71,
+    KEY_LETTER_H		= 72,
+    KEY_LETTER_I		= 73,
+    KEY_LETTER_J		= 74,
+    KEY_LETTER_K		= 75,
+    KEY_LETTER_L		= 76,
+    KEY_LETTER_M		= 77,
+    KEY_LETTER_N		= 78,
+    KEY_LETTER_O		= 79,
+    KEY_LETTER_P		= 80,
+    KEY_LETTER_Q		= 81,
+    KEY_LETTER_R		= 82,
+    KEY_LETTER_S		= 83,
+    KEY_LETTER_T		= 84,
+    KEY_LETTER_U		= 85,
+    KEY_LETTER_V		= 86,
+    KEY_LETTER_W		= 87,
+    KEY_LETTER_X		= 88,
+    KEY_LETTER_Y		= 89,
+    KEY_LETTER_Z		= 90,
+    KEY_LEFT_BRACKET    = 91,
+    KEY_BACKSLASH		= 92,
+    KEY_RIGHT_BRACKET	= 93,
+    KEY_GRAVE_ACCENT    = 96,
+    KEY_WORLD_1         = 161,
+    KEY_WORLD_2         = 162,
+    KEY_ESCAPE          = 256,
+    KEY_ENTER			= 257,
+    KEY_TAB				= 258,
+    KEY_BACKSPACE		= 259,
+    KEY_INSERT			= 260,
+    KEY_DELETE			= 261,
+    KEY_RIGHT_ARROW		= 262,
+    KEY_LEFT_ARROW		= 263,
+    KEY_DOWN_ARROW		= 264,
+    KEY_UP_ARROW		= 265,
+    KEY_PAGE_UP			= 266,
+    KEY_PAGE_DOWN		= 267,
+    KEY_HOME			= 268,
+    KEY_END				= 269,
+    KEY_CAPS_LOCK       = 280,
+    KEY_SCROLL_LOCK     = 281,
+    KEY_NUM_LOCK        = 282,
+    KEY_PRINT_SCREEN    = 283,
+    KEY_PAUSE           = 284,
+    KEY_F1              = 290,
+    KEY_F2				= 291,
+    KEY_F3				= 292,
+    KEY_F4				= 293,
+    KEY_F5				= 294,
+    KEY_F6				= 295,
+    KEY_F7				= 296,
+    KEY_F8				= 297,
+    KEY_F9				= 298,
+    KEY_F10				= 299,
+    KEY_F11				= 300,
+    KEY_F12				= 301,
+    KEY_F13				= 302,
+    KEY_F14				= 303,
+    KEY_F15				= 304,
+    KEY_F16				= 305,
+    KEY_F17				= 306,
+    KEY_F18				= 307,
+    KEY_F19				= 308,
+    KEY_F20				= 309,
+    KEY_F21				= 310,
+    KEY_F22				= 311,
+    KEY_F23				= 312,
+    KEY_F24				= 313,
+    KEY_F25				= 314,
+    KEY_KP_0            = 320,
+    KEY_KP_1			= 321,
+    KEY_KP_2			= 322,
+    KEY_KP_3			= 323,
+    KEY_KP_4			= 324,
+    KEY_KP_5			= 325,
+    KEY_KP_6			= 326,
+    KEY_KP_7			= 327,
+    KEY_KP_8			= 328,
+    KEY_KP_9			= 329,
+    KEY_KP_DECIMAL      = 330,
+    KEY_KP_DIVIDE       = 331,
+    KEY_KP_MULTIPLY     = 332, 
+    KEY_KP_SUBTRACT     = 333,
+    KEY_KP_ADD          = 334,
+    KEY_KP_ENTER        = 335,
+    KEY_KP_EQUAL        = 336,
+    KEY_LEFT_SHIFT      = 340,
+    KEY_LEFT_CONTROL    = 341,
+    KEY_LEFT_ALT        = 342,
+    KEY_LEFT_SUPER      = 343,
+    KEY_RIGHT_SHIFT     = 344,
+    KEY_RIGHT_CONTROL   = 345,
+    KEY_RIGHT_ALT       = 346,
+    KEY_RIGHT_SUPER     = 347,
+    KEY_MENU            = 348,
+    KEY_LAST            = 348 
 } key_button_t;
 
 #pragma endregion
@@ -195,17 +195,17 @@ typedef enum {
 #pragma region OpenGL Versions
 
 typedef enum {
-    OPENGL_VER_1_0 = 10,
-    OPENGL_VER_2_0 = 20,
-    OPENGL_VER_3_0 = 30,
-    OPENGL_VER_3_3 = 33,
-    OPENGL_VER_4_0 = 40,
-    OPENGL_VER_4_1 = 41,
-    OPENGL_VER_4_2 = 42,
-    OPENGL_VER_4_3 = 43,
-    OPENGL_VER_4_4 = 44,
-    OPENGL_VER_4_5 = 45,
-    OPENGL_VER_4_6 = 46
+    OPENGL_1_0 = 10,
+    OPENGL_2_0 = 20,
+    OPENGL_3_0 = 30,
+    OPENGL_3_3 = 33,
+    OPENGL_4_0 = 40,
+    OPENGL_4_1 = 41,
+    OPENGL_4_2 = 42,
+    OPENGL_4_3 = 43,
+    OPENGL_4_4 = 44,
+    OPENGL_4_5 = 45,
+    OPENGL_4_6 = 46
 } opengl_version_t;
 
 #pragma endregion
@@ -253,11 +253,11 @@ typedef enum {
     LOG_NONE 
 } log_level_t;
 
-void cpl_log(log_level_t level, char *msg, ...);
+void cpl_log(log_level_t level, const char *msg, ...);
 
 #ifdef CPL_IMPL
 
-void cpl_log(log_level_t level, char *msg, ...) {
+void cpl_log(log_level_t level, const char *msg, ...) {
     va_list args;
     va_start(args, msg);
     switch (level) {
@@ -321,11 +321,11 @@ void cpl_log(log_level_t level, char *msg, ...) {
 
 #pragma region Screenshot
 
-void screenshot_take(char *path, vec2f screen);
+void screenshot_take(const char *path, vec2f screen);
 
 #ifdef CPL_IMPL
 
-void screenshot_take(char *path, vec2f screen) {
+void screenshot_take(const char *path, vec2f screen) {
     static int screenshots_taken = 0;
     int w = (int)screen.x;
     int h = (int)screen.y;
@@ -424,14 +424,14 @@ unsigned int profiler_get_stack_used() {
 
 #pragma region OpenGL Debug
 
-GLenum _opengl_debug_check_error(char *path, unsigned int line);
+GLenum _opengl_debug_check_error(const char *path, unsigned int line);
 void opengl_debug_check_error();
 void APIENTRY _opengl_debug_out(GLenum src, GLenum type, unsigned int id, GLenum severity, GLsizei len, const char *msg, const void *usr_prog);
 void opengl_debug_enable();
 
 #ifdef CPL_IMPL
 
-GLenum _opengl_debug_check_error(char *path, unsigned int line) {
+GLenum _opengl_debug_check_error(const char *path, unsigned int line) {
     GLenum errorCode;
     while ((errorCode = glGetError()) != GL_NO_ERROR) {
         char *error;
@@ -594,21 +594,21 @@ typedef struct {
     unsigned int id;
 } shader_t;
 
-bool _shader_check_compile_errors(unsigned int shader, char *type);
-char *_shader_read_file(char *path);
-void shader_create(shader_t *s, char *vert_path, char *frag_path);
-void shader_use(shader_t *s);
-void shader_set_bool(shader_t *s, char *name, bool val);
-void shader_set_int(shader_t *s, char *name, int val);
-void shader_set_float(shader_t *s, char *name, float val);
-void shader_set_color(shader_t *s, char *name, color_t c);
-void shader_set_mat4f(shader_t *s, char *name, mat4f *mat);
-void shader_set_vec2f(shader_t *s, char *name, vec2f v);
-void shader_set_vec3f(shader_t *s, char *name, vec3f v);
+bool _shader_check_compile_errors(unsigned int shader, const char *type);
+char *_shader_read_file(const char *path);
+void shader_create   (shader_t *s, const char *vert_path, const char *frag_path);
+void shader_use      (shader_t *s);
+void shader_set_bool (shader_t *s, const char *name, bool val);
+void shader_set_int  (shader_t *s, const char *name, int val);
+void shader_set_float(shader_t *s, const char *name, float val);
+void shader_set_color(shader_t *s, const char *name, color_t c);
+void shader_set_mat4f(shader_t *s, const char *name, mat4f *mat);
+void shader_set_vec2f(shader_t *s, const char *name, vec2f v);
+void shader_set_vec3f(shader_t *s, const char *name, vec3f v);
 
 #ifdef CPL_IMPL
 
-bool _shader_check_compile_errors(unsigned int shader, char *type) {
+bool _shader_check_compile_errors(unsigned int shader, const char *type) {
     int success = 0;
     char info_cpl_log[1024];
 
@@ -629,7 +629,7 @@ bool _shader_check_compile_errors(unsigned int shader, char *type) {
     }
     return true;
 }
-char *_shader_read_file(char *path) {
+char *_shader_read_file(const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) {
         return NULL;
@@ -656,7 +656,7 @@ char *_shader_read_file(char *path) {
     buffer[size] = '\0';
     return buffer;
 }
-void shader_create(shader_t *s, char *vert_path, char *frag_path) {
+void shader_create(shader_t *s, const char *vert_path, const char *frag_path) {
     char *vert_code = _shader_read_file(vert_path);
     char *frag_code = _shader_read_file(frag_path);
 
@@ -684,25 +684,25 @@ void shader_create(shader_t *s, char *vert_path, char *frag_path) {
 void shader_use(shader_t *s) { 
     glUseProgram(s->id); 
 }
-void shader_set_bool(shader_t *s, char *name, bool val) {
+void shader_set_bool(shader_t *s, const char *name, bool val) {
     glUniform1i(glGetUniformLocation(s->id, name), val);
 }
-void shader_set_int(shader_t *s, char *name, int val) {
+void shader_set_int(shader_t *s, const char *name, int val) {
     glUniform1i(glGetUniformLocation(s->id, name), val);
 }
-void shader_set_float(shader_t *s, char *name, float val) {
+void shader_set_float(shader_t *s, const char *name, float val) {
     glUniform1f(glGetUniformLocation(s->id, name), val);
 }
-void shader_set_color(shader_t *s, char *name, color_t c) {
+void shader_set_color(shader_t *s, const char *name, color_t c) {
     glUniform4f(glGetUniformLocation(s->id, name), (float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, (float)c.a / 255.0f);
 }
-void shader_set_mat4f(shader_t *s, char *name, mat4f *mat) {
+void shader_set_mat4f(shader_t *s, const char *name, mat4f *mat) {
     glUniformMatrix4fv(glGetUniformLocation(s->id, name), 1, GL_FALSE, (const GLfloat *)mat);
 }
-void shader_set_vec2f(shader_t *s, char *name, vec2f v) {
+void shader_set_vec2f(shader_t *s, const char *name, vec2f v) {
     glUniform2f(glGetUniformLocation(s->id, name), v.x, v.y);
 }
-void shader_set_vec3f(shader_t *s, char *name, vec3f v) {
+void shader_set_vec3f(shader_t *s, const char *name, vec3f v) {
     glUniform3f(glGetUniformLocation(s->id, name), v.x, v.y, v.z);
 }
 
@@ -720,9 +720,9 @@ typedef struct {
     unsigned int vbo, vao, ebo;
 } rect_t;
 
-void rect_create(rect_t *r, vec2f pos, vec2f size, color_t color, float rot);
-void rect_destroy(rect_t *r);
-void rect_draw_raw(shader_t *s, rect_t *r);
+void rect_create  (rect_t *r, vec2f pos, vec2f size, color_t color, float rot);
+void rect_destroy (rect_t *r);
+void rect_draw_raw(rect_t *r, shader_t *s);
 
 #ifdef CPL_IMPL
 
@@ -770,14 +770,14 @@ void rect_destroy(rect_t *r) {
         r->ebo = 0;
     }
 }
-void rect_draw_raw(shader_t *s, rect_t *r) {
+void rect_draw_raw(rect_t *r, shader_t *s) {
     mat4f transform;
     mat4f_identity(&transform);
 
-    mat4f_translate(&transform, (vec3f){r->pos.x, r->pos.y, 0.0f});
-    mat4f_translate(&transform, (vec3f){r->size.x * 0.5f, r->size.y * 0.5f, 0.0f});
-    mat4f_rotate(&transform, math_rad(r->rot), (vec3f){0.0f, 0.0f, 1.0f});
-    mat4f_translate(&transform, (vec3f){-r->size.x * 0.5f, -r->size.y * 0.5f, 0.0f});
+    mat4f_translate(&transform,                   VEC3F(r->pos.x, r->pos.y, 0.0f));
+    mat4f_translate(&transform,                   VEC3F(r->size.x * 0.5f, r->size.y * 0.5f, 0.0f));
+    mat4f_rotate   (&transform, math_rad(r->rot), VEC3F(0.0f, 0.0f, 1.0f));
+    mat4f_translate(&transform,                   VEC3F(-r->size.x * 0.5f, -r->size.y * 0.5f, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", r->color);
@@ -801,14 +801,13 @@ typedef struct {
     unsigned int vbo, vao;
 } triangle_t;
 
-void triangle_create(triangle_t *t, vec2f pos, vec2f size, color_t color, float rot);
-void triangle_destroy(triangle_t *t);
-void triangle_draw_raw(shader_t *s, triangle_t *t);
+void triangle_create  (triangle_t *t, vec2f pos, vec2f size, color_t color, float rot);
+void triangle_destroy (triangle_t *t);
+void triangle_draw_raw(triangle_t *t, shader_t *s);
 
 #ifdef CPL_IMPL
 
-void triangle_create(triangle_t *t, vec2f pos, vec2f size, color_t color,
-                     float rot) {
+void triangle_create(triangle_t *t, vec2f pos, vec2f size, color_t color, float rot) {
     t->pos = pos;
     t->size = size;
     t->color = color;
@@ -817,7 +816,7 @@ void triangle_create(triangle_t *t, vec2f pos, vec2f size, color_t color,
     float vertices[9] = {
         0.0f,          0.0f,   0.0f, 
         size.x,        0.0f,   0.0f, 
-        size.x / 2.0f, size.y, 0.0f  
+        size.x * 0.5f, size.y, 0.0f  
     };
 
     glGenVertexArrays(1, &t->vao);
@@ -840,14 +839,14 @@ void triangle_destroy(triangle_t *t) {
         t->vbo = 0;
     }
 }
-void triangle_draw_raw(shader_t *s, triangle_t *t) {
+void triangle_draw_raw(triangle_t *t, shader_t *s) {
     mat4f transform;
     mat4f_identity(&transform);
 
-    mat4f_translate(&transform, (vec3f){t->pos.x, t->pos.y, 0.0f});
-    mat4f_translate(&transform, (vec3f){t->size.x * 0.5f, t->size.y * 0.5f, 0.0f});
-    mat4f_rotate(&transform, math_rad(t->rot), (vec3f){0.0f, 0.0f, 1.0f});
-    mat4f_translate(&transform, (vec3f){-t->size.x * 0.5f, -t->size.y * 0.5f, 0.0f});
+    mat4f_translate(&transform,                   VEC3F(t->pos.x, t->pos.y, 0.0f));
+    mat4f_translate(&transform,                   VEC3F(t->size.x * 0.5f, t->size.y * 0.5f, 0.0f));
+    mat4f_rotate   (&transform, math_rad(t->rot), VEC3F(0.0f, 0.0f, 1.0f));
+    mat4f_translate(&transform,                   VEC3F(-t->size.x * 0.5f, -t->size.y * 0.5f, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", t->color);
@@ -871,9 +870,9 @@ typedef struct {
     int vertex_cnt;
 } circle_t;
 
-void circle_create(circle_t *c, vec2f pos, float radius, color_t color);
-void circle_destroy(circle_t *c);
-void circle_draw_raw(shader_t *s, circle_t *c);
+void circle_create  (circle_t *c, vec2f pos, float radius, color_t color);
+void circle_destroy (circle_t *c);
+void circle_draw_raw(circle_t *c, shader_t *s);
 
 #ifdef CPL_IMPL
 
@@ -918,10 +917,10 @@ void circle_destroy(circle_t *c) {
         c->vbo = 0;
     }
 }
-void circle_draw_raw(shader_t *s, circle_t *c) {
+void circle_draw_raw(circle_t *c, shader_t *s) {
     mat4f transform;
     mat4f_identity(&transform);
-    mat4f_translate(&transform, (vec3f){c->pos.x, c->pos.y, 0.0f});
+    mat4f_translate(&transform, VEC3F(c->pos.x, c->pos.y, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", c->color);
@@ -943,9 +942,9 @@ typedef struct {
     unsigned int vao, vbo;
 } line_t;
 
-void line_create(line_t *l, vec2f start, vec2f end, color_t color);
-void line_destroy(line_t *l);
-void line_draw_raw(shader_t *s, line_t *l);
+void line_create  (line_t *l, vec2f start, vec2f end, color_t color);
+void line_destroy (line_t *l);
+void line_draw_raw(line_t *l, shader_t *s);
 
 #ifdef CPL_IMPL
 
@@ -979,13 +978,14 @@ void line_destroy(line_t *l) {
         l->vbo = 0;
     }
 }
-void line_draw_raw(shader_t *s, line_t *l) {
+void line_draw_raw(line_t *l, shader_t *s) {
     mat4f transform;
     mat4f_identity(&transform);
-    mat4f_translate(&transform, (vec3f){0.0f, 0.0f, 0.0f});
+    mat4f_translate(&transform, VEC3F(0.0f, 0.0f, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", l->color);
+
     glBindVertexArray(l->vao);
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
@@ -1016,11 +1016,11 @@ typedef struct {
     unsigned int vbo, vao, ebo;
 } texture2D_t;
 
-void texture_load(texture_t *t, char *path, texture_filtering_t filter);
-void texture_unload(texture_t *t);
-void texture2D_create(texture2D_t *t, vec2f pos, vec2f size, vec3f rot, color_t color, texture_t *tex);
-void texture2D_destroy(texture2D_t *t);
-void texture2D_draw_raw(shader_t *s, texture2D_t *t, vec2f pivot);
+void texture_load      (texture_t *t, char *path, texture_filtering_t filter);
+void texture_unload    (texture_t *t);
+void texture2D_create  (texture2D_t *t, vec2f pos, vec2f size, vec3f rot, color_t color, texture_t *tex);
+void texture2D_destroy (texture2D_t *t);
+void texture2D_draw_raw(texture2D_t *t, shader_t *s, vec2f pivot);
 
 #ifdef CPL_IMPL
 
@@ -1031,6 +1031,7 @@ void texture_load(texture_t *t, char *path, texture_filtering_t filter) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter == FILTER_LINEAR ? GL_LINEAR : GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter == FILTER_LINEAR ? GL_LINEAR : GL_NEAREST);
+
     stbi_set_flip_vertically_on_load(1);
     int width = 0;
     int height = 0;
@@ -1085,13 +1086,10 @@ void texture2D_create(texture2D_t *t, vec2f pos, vec2f size, vec3f rot, color_t 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, t->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), NULL);
     glEnableVertexAttribArray(0);
-
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -1110,7 +1108,7 @@ void texture2D_destroy(texture2D_t *t) {
     }
     t->tex = NULL;
 }
-void texture2D_draw_raw(shader_t *s, texture2D_t *t, vec2f pivot) {
+void texture2D_draw_raw(texture2D_t *t, shader_t *s, vec2f pivot) {
     mat4f transform;
     mat4f_identity(&transform);
 
@@ -1127,7 +1125,7 @@ void texture2D_draw_raw(shader_t *s, texture2D_t *t, vec2f pivot) {
     }
     mat4f_translate(&transform, (vec3f){-pivot.x, -pivot.y, 0.0f});
 
-    shader_set_int(s, "tex", 0);
+    shader_set_int  (s, "tex", 0);
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", t->color);
 
@@ -1154,18 +1152,18 @@ typedef struct {
 
 typedef struct {
     unsigned int vao, vbo;
-    char *name;
+    const char *name;
     letter_t *letters;
 } font_t;
 
-void font_load(font_t *f, char *path, char *name, texture_filtering_t filter);
-void font_delete(font_t *f);
-void text_draw_raw(shader_t *s, font_t *f, char *text, vec2f pos, float scale, color_t color);
-vec2f text_get_size(font_t *f, float scale, char *text, ...);
+void font_load     (font_t *f, const char *path, const char *name, texture_filtering_t filter);
+void font_delete   (font_t *f);
+void text_draw_raw (font_t *f, shader_t *s, const char *text, vec2f pos, float scale, color_t color);
+vec2f text_get_size(font_t *f, float scale, const char *text, ...);
 
 #ifdef CPL_IMPL
 
-void font_load(font_t *f, char *path, char *name, texture_filtering_t filter) {
+void font_load(font_t *f, const char *path, const char *name, texture_filtering_t filter) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         cpl_log(LOG_ERR, "Could not init FreeType Library");
@@ -1195,8 +1193,8 @@ void font_load(font_t *f, char *path, char *name, texture_filtering_t filter) {
         unsigned int tex = 0;
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_2D, tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (GLsizei)face->glyph->bitmap.width, (GLsizei)face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (GLsizei)face->glyph->bitmap.width, (GLsizei)face->glyph->bitmap.rows, 0, 
+                     GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter == FILTER_LINEAR ? GL_LINEAR : GL_NEAREST);
@@ -1214,7 +1212,6 @@ void font_load(font_t *f, char *path, char *name, texture_filtering_t filter) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
     glGenVertexArrays(1, &f->vao);
     glGenBuffers(1, &f->vbo);
     glBindVertexArray(f->vao);
@@ -1242,8 +1239,9 @@ void font_delete(font_t *f) {
     }
     vec_destroy(f->letters);
 }
-void text_draw_raw(shader_t *s, font_t *f, char *text, vec2f pos, float scale, color_t color) {
+void text_draw_raw(font_t *f, shader_t *s, const char *text, vec2f pos, float scale, color_t color) {
     shader_set_vec3f(s, "text_color", (vec3f){color.r, color.g, color.b});
+
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(f->vao);
 
@@ -1268,7 +1266,6 @@ void text_draw_raw(shader_t *s, font_t *f, char *text, vec2f pos, float scale, c
         glBindTexture(GL_TEXTURE_2D, l->id);
         glBindBuffer(GL_ARRAY_BUFFER, f->vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -1277,7 +1274,7 @@ void text_draw_raw(shader_t *s, font_t *f, char *text, vec2f pos, float scale, c
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
-vec2f text_get_size(font_t *f, float scale, char *text, ...) {
+vec2f text_get_size(font_t *f, float scale, const char *text, ...) {
     float width = 0.0f;
     float height = 0.0f;
     float max_above_base = 0.0f;
@@ -1356,8 +1353,8 @@ pthread_t _net_worker;
 void *_client_net_worker_loop();
 void client_create_worker_loop(client_t *client, void (*parse_data)(char *, size_t, net_channel_t, void *), void *parse_data_arg);
 void client_destroy_worker_loop();
-char *read_ip_from_txt_file(char *path);
-bool client_create(client_t *client, char *ip, int port, int wait_ms);
+char *read_ip_from_txt_file(const char *path);
+bool client_create (client_t *client, const char *ip, int port, int wait_ms);
 void client_destroy(client_t *client, int wait_ms);
 
 #ifdef CPL_IMPL
@@ -1397,7 +1394,7 @@ void client_destroy_worker_loop() {
     _net_worker_running = false;
     pthread_join(_net_worker, NULL);
 }
-char *read_ip_from_txt_file(char *path) {
+char *read_ip_from_txt_file(const char *path) {
     FILE *file = fopen(path, "rb");
     if (!file) {
         return NULL;
@@ -1436,7 +1433,7 @@ char *read_ip_from_txt_file(char *path) {
     fclose(file);
     return buffer;
 }
-bool client_create(client_t *client, char *ip, int port, int wait_ms) {
+bool client_create(client_t *client, const char *ip, int port, int wait_ms) {
     if (enet_initialize()) {
         fprintf(stderr, "Failed to init ENet\n");
         exit(-1);
@@ -1492,7 +1489,7 @@ typedef struct {
     ENetAddress address;
 } server_t;
 
-void server_init(server_t *server, int port, struct in6_addr host, int max_clients);
+void server_init   (server_t *server, int port, struct in6_addr host, int max_clients);
 void server_destroy(server_t *server);
 
 #ifdef CPL_IMPL
@@ -1704,7 +1701,7 @@ void packet_broadcast(server_t *server, packet_writer *writer, int packet_flag, 
 #pragma region Audio
 
 typedef struct {
-    char *path;
+    const char *path;
     float volume;
     float pitch;
 } audio_t;
@@ -1730,7 +1727,7 @@ ma_device _capture_device;
 #endif
 
 void audio_init();
-audio_t audio_load(char *path);
+audio_t audio_load(const char *path);
 void audio_update();
 void audio_play_sound(audio_t *a);
 void audio_play_music(audio_t *a);
@@ -1760,7 +1757,9 @@ void audio_init() {
     _active_sounds = malloc(_active_sounds_cap * sizeof(ma_sound *));
     _music = NULL;
 }
-audio_t audio_load(char *path) { return (audio_t){path, 1.0f, 1.0f}; }
+audio_t audio_load(const char *path) { 
+    return (audio_t){path, 1.0f, 1.0f}; 
+}
 void audio_update() {
     unsigned int w = 0;
     for (unsigned int i = 0; i < _active_sounds_size; i++) {
@@ -1940,7 +1939,9 @@ void _audio_playback_callback(ma_device *device, void *out, const void *in, unsi
         total_frames_read += frames_to_read;
     }
 }
-void audio_muted(bool enable) { _muted = enable; }
+void audio_muted(bool enable) { 
+    _muted = enable; 
+}
 void audio_init_voice_chat(client_t *client, int *id) {
     _client = client;
     _id = id;
@@ -1990,9 +1991,9 @@ typedef struct {
 
 void screen_quad_create(screen_quad_t *q, int width, int height);
 void screen_quad_resize(screen_quad_t *q, int width, int height);
-void screen_quad_bind(screen_quad_t *q);
+void screen_quad_bind  (screen_quad_t *q);
 void screen_quad_unbind();
-void screen_quad_draw(screen_quad_t *q, shader_t *s);
+void screen_quad_draw  (screen_quad_t *q, shader_t *s);
 
 #ifdef CPL_IMPL
 
@@ -2085,10 +2086,10 @@ typedef struct {
     float radius;
 } circle_collider_t;
 
-bool check_collision_rects(rect_collider_t a, rect_collider_t b);
-bool check_collision_circle_rect(circle_collider_t a, rect_collider_t b);
-bool check_collision_vec2f_rect(vec2f a, rect_collider_t b);
-bool check_collision_circles(circle_collider_t a, circle_collider_t b);
+bool check_collision_rects       (rect_collider_t a, rect_collider_t b);
+bool check_collision_circle_rect (circle_collider_t a, rect_collider_t b);
+bool check_collision_vec2f_rect  (vec2f a, rect_collider_t b);
+bool check_collision_circles     (circle_collider_t a, circle_collider_t b);
 bool check_collision_vec2f_circle(vec2f a, circle_collider_t b);
 
 #ifdef CPL_IMPL
@@ -2229,12 +2230,12 @@ bool _prev_mouse_button_states[MOUSE_BUTTON_LAST + 1];
 #endif
 
 void _input_update();
-bool is_key_down(key_button_t key);
-bool is_key_up(key_button_t key);
-bool is_key_pressed(key_button_t key);
+bool is_key_down    (key_button_t key);
+bool is_key_up      (key_button_t key);
+bool is_key_pressed (key_button_t key);
 bool is_key_released(key_button_t key);
-bool is_mouse_down(mouse_button_t button);
-bool is_mouse_pressed(mouse_button_t button);
+bool is_mouse_down    (mouse_button_t button);
+bool is_mouse_pressed (mouse_button_t button);
 bool is_mouse_released(mouse_button_t button);
 mat4f *cam_2D_get_view_mat(cam2D_t *cam);
 cam2D_t *get_cam_2D();
@@ -2510,7 +2511,7 @@ void display_details(font_t *font);
 #ifdef CPL_IMPL
 
 void clear_background(color_t color) {
-    glClearColor(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
+    glClearColor((float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 void begin_draw(draw_mode_t draw_mode, bool mode_2D) {
@@ -2528,26 +2529,26 @@ void begin_draw(draw_mode_t draw_mode, bool mode_2D) {
 void draw_rect(vec2f pos, vec2f size, color_t color, float rot) {
     rect_t r;
     rect_create(&r, pos, size, color, rot);
-    rect_draw_raw(&_shaders[_cur_draw_mode], &r);
+    rect_draw_raw(&r, &_shaders[_cur_draw_mode]);
     rect_destroy(&r);
 }
 void draw_triangle(vec2f pos, vec2f size, color_t color, float rot) {
     triangle_t t;
     triangle_create(&t, pos, size, color, rot);
-    triangle_draw_raw(&_shaders[_cur_draw_mode], &t);
+    triangle_draw_raw(&t, &_shaders[_cur_draw_mode]);
     triangle_destroy(&t);
 }
 void draw_circle(vec2f pos, float radius, color_t color) {
     circle_t c;
     circle_create(&c, pos, radius, color);
-    circle_draw_raw(&_shaders[_cur_draw_mode], &c);
+    circle_draw_raw(&c, &_shaders[_cur_draw_mode]);
     circle_destroy(&c);
 }
 void draw_line(vec2f start, vec2f end, float thickness, color_t color) {
     line_t l;
     line_create(&l, start, end, color);
     glLineWidth(thickness);
-    line_draw_raw(&_shaders[_cur_draw_mode], &l);
+    line_draw_raw(&l, &_shaders[_cur_draw_mode]);
     glLineWidth(1.0f);
     line_destroy(&l);
 }
@@ -2559,7 +2560,7 @@ void draw_text(font_t *font, vec2f pos, float scale, color_t color, char *text, 
         vsnprintf(buffer, 1024, text, args);
         va_end(args);
     }
-    text_draw_raw(&_shaders[_cur_draw_mode], font, buffer, pos, scale, color);
+    text_draw_raw(font, &_shaders[_cur_draw_mode], buffer, pos, scale, color);
 }
 void draw_text_shadow(font_t *font, vec2f pos, float scale, color_t color, vec2f shadow_off, color_t shadow_color, char *text, ...) {
     char buffer[KiB(1)];
@@ -2569,13 +2570,13 @@ void draw_text_shadow(font_t *font, vec2f pos, float scale, color_t color, vec2f
         vsnprintf(buffer, 1024, text, args);
         va_end(args);
     }
-    text_draw_raw(&_shaders[_cur_draw_mode], font, buffer, VEC2F(pos.x + shadow_off.x, pos.y + shadow_off.y), scale, shadow_color);
-    text_draw_raw(&_shaders[_cur_draw_mode], font, buffer, pos, scale, color);
+    text_draw_raw(font, &_shaders[_cur_draw_mode], buffer, VEC2F(pos.x + shadow_off.x, pos.y + shadow_off.y), scale, shadow_color);
+    text_draw_raw(font, &_shaders[_cur_draw_mode], buffer, pos, scale, color);
 }
 void draw_texture2D(texture_t *tex, vec2f pos, vec2f size, color_t color, vec3f rot, vec2f pivot) {
     texture2D_t t;
     texture2D_create(&t, pos, size, rot, color, tex);
-    texture2D_draw_raw(&_shaders[_cur_draw_mode], &t, pivot);
+    texture2D_draw_raw(&t, &_shaders[_cur_draw_mode], pivot);
     texture2D_destroy(&t);
 }
 void _reset_shader() { 
@@ -2718,17 +2719,17 @@ typedef struct {
     unsigned int vao;
 } tilemap_t;
 
-void tilemap_load_texture(tilemap_t *m, char *path, texture_filtering_t filter);
-void tilemap_delete_tile(tilemap_t *m, vec2f pos);
-bool tilemap_tile_exists(tilemap_t *m, vec2f pos);
+void tilemap_load_texture          (tilemap_t *m, char *path, texture_filtering_t filter);
+void tilemap_delete_tile           (tilemap_t *m, vec2f pos);
+bool tilemap_tile_exists           (tilemap_t *m, vec2f pos);
 void tilemap_check_collidable_tiles(tilemap_t *m, vec2f size);
-bool tilemap_tile_collidable(tilemap_t *m, vec2f pos);
-vec2f tilemap_get_tile_uv(tilemap_t *m, vec2f pos);
-void tilemap_create(tilemap_t *m, vec2f tile_size);
-void tilemap_destroy(tilemap_t *m);
-void tilemap_begin_editing(tilemap_t *m);
-void tilemap_add_tile(tilemap_t *m, vec2f pos, vec2f size, vec2f uv);
-void tilemap_draw(tilemap_t *m, color_t color);
+bool tilemap_tile_collidable       (tilemap_t *m, vec2f pos);
+vec2f tilemap_get_tile_uv          (tilemap_t *m, vec2f pos);
+void tilemap_create                (tilemap_t *m, vec2f tile_size);
+void tilemap_destroy               (tilemap_t *m);
+void tilemap_begin_editing         (tilemap_t *m);
+void tilemap_add_tile              (tilemap_t *m, vec2f pos, vec2f size, vec2f uv);
+void tilemap_draw                  (tilemap_t *m, color_t color);
 
 #ifdef CPL_IMPL
 
@@ -2916,7 +2917,7 @@ void tilemap_draw(tilemap_t *m, color_t color) {
 #define UNLIMITED_PARTICLES 0
 
 #define PARTICLE(pos, size, dir, color, life_time, rot, tex)                   \
-    (particle) { tex, pos, size, dir, color, 0, life_time, rot, true }
+(particle) { tex, pos, size, dir, color, 0, life_time, rot, true }
 
 typedef struct {
     texture_t *tex;
@@ -2937,10 +2938,10 @@ typedef struct {
     particle_t *particles;
 } particle_system_t;
 
-void particle_system_create(particle_system_t *ps, vec2f pos, unsigned int max_particles);
-void particle_system_destroy(particle_system_t *ps);
-void particle_system_update(particle_system_t *ps);
-void particle_system_draw(particle_system_t *ps);
+void particle_system_create      (particle_system_t *ps, vec2f pos, unsigned int max_particles);
+void particle_system_destroy     (particle_system_t *ps);
+void particle_system_update      (particle_system_t *ps);
+void particle_system_draw        (particle_system_t *ps);
 void particle_system_add_particle(particle_system_t *ps, particle_t p);
 
 #ifdef CPL_IMPL
@@ -3023,33 +3024,37 @@ void hdr_init() {
     glBindFramebuffer(GL_FRAMEBUFFER, _hdr.fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _hdr.color_buffer, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _hdr.rbo_depth);
+
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         cpl_log(LOG_ERR, "Framebuffer is not complete!");
     }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 void hdr_quad_resize(hdr_t *h, int width, int height) {
     glBindTexture(GL_TEXTURE_2D, h->color_buffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
                  GL_UNSIGNED_BYTE, NULL);
-
     glBindRenderbuffer(GL_RENDERBUFFER, h->rbo_depth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 void hdr_begin() {
     glBindFramebuffer(GL_FRAMEBUFFER, _hdr.fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     hdr_quad_resize(&_hdr, (int)_screen_width, (int)_screen_height);
 }
 void hdr_apply(bool gamma_correct, float exposure) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     shader_use(&_hdr_shader);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _hdr.color_buffer);
+
     shader_set_bool(&_hdr_shader, "gamma_correct", gamma_correct);
     shader_set_float(&_hdr_shader, "exposure", exposure);
     if (_hdr.quad_vao == 0) {
@@ -3059,6 +3064,7 @@ void hdr_apply(bool gamma_correct, float exposure) {
             1.0f,  1.0f,  0.0f, 1.0f, 1.0f, 
             1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, 
         };
+
         glGenVertexArrays(1, &_hdr.quad_vao);
         glGenBuffers(1, &_hdr.quad_vbo);
         glBindVertexArray(_hdr.quad_vao);
