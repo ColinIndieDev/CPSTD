@@ -45,9 +45,9 @@
 #include "../cpstd/vector.h"
 
 // Available macros
-#define CPL_IMPL
-#define CPL_INCLUDE_NETWORKING
-#define CPL_INCLUDE_DEBUG
+// #define CPL_IMPL
+// #define CPL_INCLUDE_NETWORKING
+// #define CPL_INCLUDE_DEBUG
 
 #pragma region Key Inputs
 
@@ -713,20 +713,20 @@ void shader_set_vec3f(shader_t *s, const char *name, vec3f v) {
 #pragma region Rectangle
 
 typedef struct {
+    vec3f rot;
     vec2f pos;
     vec2f size;
     color_t color;
-    float rot;
     unsigned int vbo, vao, ebo;
 } rect_t;
 
-void rect_create  (rect_t *r, vec2f pos, vec2f size, color_t color, float rot);
+void rect_create  (rect_t *r, vec2f pos, vec2f size, color_t color, vec3f rot);
 void rect_destroy (rect_t *r);
-void rect_draw_raw(rect_t *r, shader_t *s);
+void rect_draw_raw(rect_t *r, shader_t *s, vec2f pivot);
 
 #ifdef CPL_IMPL
 
-void rect_create(rect_t *r, vec2f pos, vec2f size, color_t color, float rot) {
+void rect_create(rect_t *r, vec2f pos, vec2f size, color_t color, vec3f rot) {
     r->pos = pos;
     r->size = size;
     r->color = color;
@@ -770,14 +770,22 @@ void rect_destroy(rect_t *r) {
         r->ebo = 0;
     }
 }
-void rect_draw_raw(rect_t *r, shader_t *s) {
+void rect_draw_raw(rect_t *r, shader_t *s, vec2f pivot) {
     mat4f transform;
     mat4f_identity(&transform);
 
-    mat4f_translate(&transform,                   VEC3F(r->pos.x, r->pos.y, 0.0f));
-    mat4f_translate(&transform,                   VEC3F(r->size.x * 0.5f, r->size.y * 0.5f, 0.0f));
-    mat4f_rotate   (&transform, math_rad(r->rot), VEC3F(0.0f, 0.0f, 1.0f));
-    mat4f_translate(&transform,                   VEC3F(-r->size.x * 0.5f, -r->size.y * 0.5f, 0.0f));
+    mat4f_translate(&transform, VEC3F(r->pos.x, r->pos.y, 0.0f));
+    mat4f_translate(&transform, VEC3F(pivot.x, pivot.y, 0.0f));
+    if (r->rot.z != 0.0f) {
+        mat4f_rotate(&transform, math_rad(r->rot.z), VEC3F(0.0f, 0.0f, 1.0f));
+    }
+    if (r->rot.y != 0.0f) {
+        mat4f_rotate(&transform, math_rad(r->rot.y), VEC3F(0.0f, 1.0f, 0.0f));
+    }
+    if (r->rot.x != 0.0f) {
+        mat4f_rotate(&transform, math_rad(r->rot.x), VEC3F(1.0f, 0.0f, 0.0f));
+    }
+    mat4f_translate(&transform, VEC3F(-pivot.x, -pivot.y, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", r->color);
@@ -794,20 +802,20 @@ void rect_draw_raw(rect_t *r, shader_t *s) {
 #pragma region Triangle
 
 typedef struct {
+    vec3f rot;
     vec2f pos;
     vec2f size;
     color_t color;
-    float rot;
     unsigned int vbo, vao;
 } triangle_t;
 
-void triangle_create  (triangle_t *t, vec2f pos, vec2f size, color_t color, float rot);
+void triangle_create  (triangle_t *t, vec2f pos, vec2f size, color_t color, vec3f rot);
 void triangle_destroy (triangle_t *t);
-void triangle_draw_raw(triangle_t *t, shader_t *s);
+void triangle_draw_raw(triangle_t *t, shader_t *s, vec2f pivot);
 
 #ifdef CPL_IMPL
 
-void triangle_create(triangle_t *t, vec2f pos, vec2f size, color_t color, float rot) {
+void triangle_create(triangle_t *t, vec2f pos, vec2f size, color_t color, vec3f rot) {
     t->pos = pos;
     t->size = size;
     t->color = color;
@@ -839,14 +847,22 @@ void triangle_destroy(triangle_t *t) {
         t->vbo = 0;
     }
 }
-void triangle_draw_raw(triangle_t *t, shader_t *s) {
+void triangle_draw_raw(triangle_t *t, shader_t *s, vec2f pivot) {
     mat4f transform;
     mat4f_identity(&transform);
 
-    mat4f_translate(&transform,                   VEC3F(t->pos.x, t->pos.y, 0.0f));
-    mat4f_translate(&transform,                   VEC3F(t->size.x * 0.5f, t->size.y * 0.5f, 0.0f));
-    mat4f_rotate   (&transform, math_rad(t->rot), VEC3F(0.0f, 0.0f, 1.0f));
-    mat4f_translate(&transform,                   VEC3F(-t->size.x * 0.5f, -t->size.y * 0.5f, 0.0f));
+    mat4f_translate(&transform, VEC3F(t->pos.x, t->pos.y, 0.0f));
+    mat4f_translate(&transform, VEC3F(pivot.x, pivot.y, 0.0f));
+    if (t->rot.z != 0.0f) {
+        mat4f_rotate(&transform, math_rad(t->rot.z), VEC3F(0.0f, 0.0f, 1.0f));
+    }
+    if (t->rot.y != 0.0f) {
+        mat4f_rotate(&transform, math_rad(t->rot.y), VEC3F(0.0f, 1.0f, 0.0f));
+    }
+    if (t->rot.x != 0.0f) {
+        mat4f_rotate(&transform, math_rad(t->rot.x), VEC3F(1.0f, 0.0f, 0.0f));
+    }
+    mat4f_translate(&transform, VEC3F(-pivot.x, -pivot.y, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", t->color);
@@ -863,6 +879,7 @@ void triangle_draw_raw(triangle_t *t, shader_t *s) {
 #pragma region Circle
 
 typedef struct {
+    vec3f rot;
     vec2f pos;
     float radius;
     color_t color;
@@ -870,14 +887,15 @@ typedef struct {
     int vertex_cnt;
 } circle_t;
 
-void circle_create  (circle_t *c, vec2f pos, float radius, color_t color);
+void circle_create  (circle_t *c, vec2f pos, float radius, color_t color, vec3f rot);
 void circle_destroy (circle_t *c);
-void circle_draw_raw(circle_t *c, shader_t *s);
+void circle_draw_raw(circle_t *c, shader_t *s, vec2f pivot);
 
 #ifdef CPL_IMPL
 
-void circle_create(circle_t *c, vec2f pos, float radius, color_t color) {
+void circle_create(circle_t *c, vec2f pos, float radius, color_t color, vec3f rot) {
     c->pos = pos;
+    c->rot = rot;
     c->color = color;
     c->radius = radius;
 
@@ -917,10 +935,22 @@ void circle_destroy(circle_t *c) {
         c->vbo = 0;
     }
 }
-void circle_draw_raw(circle_t *c, shader_t *s) {
+void circle_draw_raw(circle_t *c, shader_t *s, vec2f pivot) {
     mat4f transform;
     mat4f_identity(&transform);
+
     mat4f_translate(&transform, VEC3F(c->pos.x, c->pos.y, 0.0f));
+    mat4f_translate(&transform, VEC3F(pivot.x, pivot.y, 0.0f));
+    if (c->rot.z != 0.0f) {
+        mat4f_rotate(&transform, math_rad(c->rot.z), VEC3F(0.0f, 0.0f, 1.0f));
+    }
+    if (c->rot.y != 0.0f) {
+        mat4f_rotate(&transform, math_rad(c->rot.y), VEC3F(0.0f, 1.0f, 0.0f));
+    }
+    if (c->rot.x != 0.0f) {
+        mat4f_rotate(&transform, math_rad(c->rot.x), VEC3F(1.0f, 0.0f, 0.0f));
+    }
+    mat4f_translate(&transform, VEC3F(-pivot.x, -pivot.y, 0.0f));
 
     shader_set_mat4f(s, "transform", &transform);
     shader_set_color(s, "input_color", c->color);
@@ -1112,18 +1142,18 @@ void texture2D_draw_raw(texture2D_t *t, shader_t *s, vec2f pivot) {
     mat4f transform;
     mat4f_identity(&transform);
 
-    mat4f_translate(&transform, (vec3f){t->pos.x, t->pos.y, 0.0f});
-    mat4f_translate(&transform, (vec3f){pivot.x, pivot.y, 0.0f});
+    mat4f_translate(&transform, VEC3F(t->pos.x, t->pos.y, 0.0f));
+    mat4f_translate(&transform, VEC3F(pivot.x, pivot.y, 0.0f));
     if (t->rot.z != 0.0f) {
-        mat4f_rotate(&transform, math_rad(t->rot.z), (vec3f){0.0f, 0.0f, 1.0f});
+        mat4f_rotate(&transform, math_rad(t->rot.z), VEC3F(0.0f, 0.0f, 1.0f));
     }
     if (t->rot.y != 0.0f) {
-        mat4f_rotate(&transform, math_rad(t->rot.y), (vec3f){0.0f, 1.0f, 0.0f});
+        mat4f_rotate(&transform, math_rad(t->rot.y), VEC3F(0.0f, 1.0f, 0.0f));
     }
     if (t->rot.x != 0.0f) {
-        mat4f_rotate(&transform, math_rad(t->rot.x), (vec3f){1.0f, 0.0f, 0.0f});
+        mat4f_rotate(&transform, math_rad(t->rot.x), VEC3F(1.0f, 0.0f, 0.0f));
     }
-    mat4f_translate(&transform, (vec3f){-pivot.x, -pivot.y, 0.0f});
+    mat4f_translate(&transform, VEC3F(-pivot.x, -pivot.y, 0.0f));
 
     shader_set_int  (s, "tex", 0);
     shader_set_mat4f(s, "transform", &transform);
@@ -2494,13 +2524,13 @@ void end_frame() {
 
 #pragma region Drawing
 
-#define NO_ROTATION (vec3f){0.0f, 0.0f, 0.0f}, VEC2F(0.0f, 0.0f)
+#define NO_ROTATION VEC3F(0.0f, 0.0f, 0.0f), VEC2F(0.0f, 0.0f)
 
 void clear_background(color_t color);
 void begin_draw(draw_mode_t draw_mode, bool mode_2D);
-void draw_rect(vec2f pos, vec2f size, color_t color, float rot);
-void draw_triangle(vec2f pos, vec2f size, color_t color, float rot);
-void draw_circle(vec2f pos, float radius, color_t color);
+void draw_rect(vec2f pos, vec2f size, color_t color, vec3f rot, vec2f pivot);
+void draw_triangle(vec2f pos, vec2f size, color_t color, vec3f rot, vec2f pivot);
+void draw_circle(vec2f pos, float radius, color_t color, vec3f rot, vec2f pivot);
 void draw_line(vec2f start, vec2f end, float thickness, color_t color);
 void draw_text(font_t *font, vec2f pos, float scale, color_t color, char *text, ...);
 void draw_text_shadow(font_t *font, vec2f pos, float scale, color_t color, vec2f shadow_off, color_t shadow_color, char *text, ...);
@@ -2526,22 +2556,22 @@ void begin_draw(draw_mode_t draw_mode, bool mode_2D) {
     }
     shader_set_mat4f(&_shaders[draw_mode], "projection", mode_2D ? &view_projection_2D : &_projection_2D);
 }
-void draw_rect(vec2f pos, vec2f size, color_t color, float rot) {
+void draw_rect(vec2f pos, vec2f size, color_t color, vec3f rot, vec2f pivot) {
     rect_t r;
     rect_create(&r, pos, size, color, rot);
-    rect_draw_raw(&r, &_shaders[_cur_draw_mode]);
+    rect_draw_raw(&r, &_shaders[_cur_draw_mode], pivot);
     rect_destroy(&r);
 }
-void draw_triangle(vec2f pos, vec2f size, color_t color, float rot) {
+void draw_triangle(vec2f pos, vec2f size, color_t color, vec3f rot, vec2f pivot) {
     triangle_t t;
     triangle_create(&t, pos, size, color, rot);
-    triangle_draw_raw(&t, &_shaders[_cur_draw_mode]);
+    triangle_draw_raw(&t, &_shaders[_cur_draw_mode], pivot);
     triangle_destroy(&t);
 }
-void draw_circle(vec2f pos, float radius, color_t color) {
+void draw_circle(vec2f pos, float radius, color_t color, vec3f rot, vec2f pivot) {
     circle_t c;
-    circle_create(&c, pos, radius, color);
-    circle_draw_raw(&c, &_shaders[_cur_draw_mode]);
+    circle_create(&c, pos, radius, color, rot);
+    circle_draw_raw(&c, &_shaders[_cur_draw_mode], pivot);
     circle_destroy(&c);
 }
 void draw_line(vec2f start, vec2f end, float thickness, color_t color) {
