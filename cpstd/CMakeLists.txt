@@ -6,11 +6,32 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(cpstd VERSION 1.0.0 LANGUAGES C)
 
-# Too lazy but not recommended at all 
-file(GLOB CPSTD_SOURCES "*.c")
-file(GLOB CPSTD_HEADERS "*.h")
+set(CPSTD_HEADERS
+    arena.h
+    bitarr.h
+    hashmap.h
+    mathplus.h
+    queue.h
+    rand.h
+    strings.h
+    vector.h
+)
 
-add_library(cpstd STATIC ${CPSTD_SOURCES} ${CPSTD_HEADERS})
+add_library(cpstd SHARED
+    ${CPSTD_HEADERS}
+
+    arena.c
+    bitarr.c
+    hashmap.c
+    mathplus.c
+    queue.c
+    rand.c
+    strings.c
+    vector.c
+)
+
+install(FILES ${CPSTD_HEADERS} DESTINATION include/cpstd)
+
 target_include_directories(cpstd PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include>

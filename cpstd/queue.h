@@ -11,7 +11,7 @@ typedef struct {
 
 #define q_header(queue) ((queue) ? ((q_header_t *)(queue) - 1) : NULL)
 #define queue_size(queue) ((queue) ? q_header(queue)->size : 0)
-#define queue_empty(queue) (queue_header(queue)->size == 0)
+#define queue_empty(queue) (q_header(queue)->size == 0)
 
 #define queue_init(q, capacity) queue_init_impl(capacity, sizeof(*(q)))
 void *queue_init_impl(size_t capacity, size_t element_size);
@@ -25,6 +25,7 @@ void *queue_resize_impl(void *q, size_t element_size);
         q_header_t *header = q_header(q);                                      \
         if (header->size >= header->capacity) {                                \
             (q) = queue_resize_impl(q, sizeof(*(q)));                          \
+            header = q_header(q);                                              \
         }                                                                      \
         (q)[header->head] = (val);                                             \
         header->head = (header->head + 1) % header->capacity;                  \

@@ -111,29 +111,8 @@ endif()
 
 #### Linking ####
 
-# Is used here but normally never do 
-# it name the files manually
-
-file(GLOB_RECURSE SOURCE_FILES CONFIGURE DEPENDS cpstd/*.h cplterminal/*.h cpaudio/*.h cpai/*.h cplibrary/*.h)
-message(STATUS "============================================")
-message(STATUS "Included files")
-message(STATUS "============================================")
-foreach(f IN LISTS SOURCE_FILES)
-    file(RELATIVE_PATH rel ${CMAKE_SOURCE_DIR} ${f})
-    message(STATUS "    ${rel}")
-endforeach()
-message(STATUS "============================================")
-
 add_executable(${CMAKE_PROJECT_NAME}
-    #cpstd/hashmap.c
-    #cpstd/vector.c
-    #cpstd/bitarr.c
-    #cpstd/rand.c
-    #cpstd/queue.c
-    #cpstd/strings.c
-
     src/test.c
-    #${SOURCE_FILES}
 )
 
 # OpenMP, pthread, GLFW, GLAD, STB, FT & ENet

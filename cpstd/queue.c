@@ -29,11 +29,12 @@ void *queue_resize_impl(void *q, size_t element_size) {
         memcpy(new_queue + (i * element_size),
                q + (((header->tail + i) % header->capacity) * element_size),
                element_size);
-    }
+    } 
     q_header_t *new_header = q_header(new_queue);
     new_header->capacity = new_capacity;
     new_header->tail = 0;
-    new_header->head = header->size;
+    new_header->head = header->size; 
+    new_header->size = header->size;
 
     free(header);
 
