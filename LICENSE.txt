@@ -16,9 +16,6 @@ Under the following terms:
 
 - NoDerivatives: If you remix, transform, or build upon the material, 
   you may not distribute the modified material.
-
-- You may use the contained headers / libraries
-  for personal or educational projects, provided you give credit to Colin Pham (or the aliases).
 ________________________________________________________________________________________________
 ________________________________________________________________________________________________
 Full license text: https://creativecommons.org/licenses/by-nc-nd/4.0/
