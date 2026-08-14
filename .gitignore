@@ -26,3 +26,4 @@ highscore.bin
 asan-suppressions.txt
 lsan-suppressions.txt
 ubsan-suppressions.txt
+src
