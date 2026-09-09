@@ -7,27 +7,29 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(cpstd VERSION 1.0.0 LANGUAGES C)
 
 set(CPSTD_HEADERS
-    arena.h
-    bitarr.h
-    hashmap.h
-    mathplus.h
-    queue.h
-    rand.h
-    strings.h
-    vector.h
+    include/cpstd/arena.h
+    include/cpstd/bitarr.h
+    include/cpstd/hashmap.h
+    include/cpstd/mathplus.h
+    include/cpstd/queue.h
+    include/cpstd/rand.h
+    include/cpstd/strings.h
+    include/cpstd/vector.h
+    include/cpstd/hashset.h
 )
 
-add_library(cpstd SHARED
+add_library(cpstd STATIC 
     ${CPSTD_HEADERS}
 
-    arena.c
-    bitarr.c
-    hashmap.c
-    mathplus.c
-    queue.c
-    rand.c
-    strings.c
-    vector.c
+    src/arena.c
+    src/bitarr.c
+    src/hashmap.c
+    src/mathplus.c
+    src/queue.c
+    src/rand.c
+    src/strings.c
+    src/vector.c
+    src/hashset.c
 )
 
 install(FILES ${CPSTD_HEADERS} DESTINATION include/cpstd)
